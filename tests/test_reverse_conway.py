@@ -8,7 +8,7 @@
 
 import unittest
 
-from reverse_conway import *
+from reverse_game_of_life import *
 
 class ConwayBoardTestCase(unittest.TestCase):
     def test_constructor_blank(self):
