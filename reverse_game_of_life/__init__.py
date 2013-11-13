@@ -1,1 +1,1 @@
-from reverse_conway import ConwayBoard
+from reverse_game_of_life.reverse_conway import ConwayBoard
