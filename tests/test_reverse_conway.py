@@ -5,22 +5,26 @@
 # usage (auto discovery):
 #    python3 -m unittest discover
 
+import numpy as np
 
 import unittest
 
 from reverse_game_of_life import *
 
 class ConwayBoardTestCase(unittest.TestCase):
+    def assert_array_equal(self, a1, a2):        
+        self.assertTrue(np.array_equal(a1,a2))
+
     def test_constructor_blank(self):
+        ''' Dead board constructor. '''
         b = ConwayBoard(rows=3,cols=3)
-        self.assertEqual(b.board,[[0,0,0],[0,0,0],[0,0,0]])
+        self.assert_array_equal(b.board,[[0,0,0],[0,0,0],[0,0,0]])
 
     def test_construct_board(self):
+        ''' Initialize constructor. '''
         board = [[1,1,1],[0,1,0],[1,0,0]]
         b = ConwayBoard(board=board)
-        self.assertEqual(b.num_rows,3)
-        self.assertEqual(b.num_cols,3)
-        self.assertEqual(b.board,board)
+        self.assert_array_equal(b.board,board)
         
         
     def test_advance_steady(self):
@@ -29,7 +33,7 @@ class ConwayBoardTestCase(unittest.TestCase):
         end = [[0,0,0],[0,0,0],[0,0,0]]
         b = ConwayBoard(board=start)
         b.advance()
-        self.assertEqual(b.board,end)
+        self.assert_array_equal(b.board,end)
 
     def test_advance_death(self):
         ''' 1 neighbor dies. '''
@@ -37,7 +41,7 @@ class ConwayBoardTestCase(unittest.TestCase):
         end = [[0,0,0],[0,0,0],[0,0,0]]
         b = ConwayBoard(board=start)
         b.advance()
-        self.assertEqual(b.board,end)
+        self.assert_array_equal(b.board,end)
         
 
     def test_advance_survival(self):
@@ -46,7 +50,7 @@ class ConwayBoardTestCase(unittest.TestCase):
         end = [[0,0,0],[1,1,0],[1,1,0]]
         b = ConwayBoard(board=start)
         b.advance()
-        self.assertEqual(b.board,end)
+        self.assert_array_equal(b.board,end)
 
     def test_advance_overcrowding(self):
         ''' More than 3 neighbors dies. '''
@@ -54,7 +58,7 @@ class ConwayBoardTestCase(unittest.TestCase):
         end = [[1,0,1],[0,0,0],[1,0,1]]
         b = ConwayBoard(board=start)
         b.advance()
-        self.assertEqual(b.board,end)
+        self.assert_array_equal(b.board,end)
         
     def test_advance_birth(self):
         ''' Exactly 3 neighbors spawns live cell. '''
@@ -62,7 +66,7 @@ class ConwayBoardTestCase(unittest.TestCase):
         end = [[0,0,0],[0,1,0],[0,0,0]]
         b = ConwayBoard(board=start)
         b.advance()
-        self.assertEqual(b.board,end)
+        self.assert_array_equal(b.board,end)
 
                                 
                                     
