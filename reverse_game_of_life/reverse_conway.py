@@ -52,3 +52,39 @@ class ConwayBoard:
         ''' Make ASCII representation of board. Use print(b.pretty_string()) for useful display. '''
         return '\n'.join([''.join([str(x) for x in row]) for row in self.board])
 
+
+
+class Example:
+    ''' A reverse conway example, stores the starting board (if known), the ending board, and the delta steps between start and end. '''
+
+    def __init__(self,delta, start_board=None,end_board=None):
+        ''' Construct an example, delta is required, start and end, or just one board can be supplied. If only start is supplied, the end board is computed, if only end board is supplied then no evaluation is possible. '''
+        self.delta = delta
+        if start_board is None and end_board is None:
+            raise ValueError('start_board and end_board cannot both be None')
+        elif end_board is None:
+            self.start_board = ConwayBoard(board=start_board)
+            # compute the ending board
+            self.end_board = ConwayBoard(board=start_board)
+            for i in range(self.delta):
+                self.end_board.advance()
+        elif start_board is None:
+            self.start_board = None
+            self.end_board = ConwayBoard(end_board)
+        else:
+            self.start_board = ConwayBoard(start_board)
+            self.end_board = ConwayBoard(end_board)
+
+    def evaluate(self, predicted_board):
+        ''' Computer error rate of predicted start board. '''
+        if start_board is None:
+            raise RuntimeError('Cannot evaluate an example with no start board.')
+        # the magic of broadcasting ... maybe
+        errors = sum([label==predict for label,predict in np.nditer([start_board,predicted_board])])
+        return 1.0*errors/(self.num_rows*self.num_cols)
+
+            
+
+    
+
+        
