@@ -48,4 +48,7 @@ class ConwayBoard:
         new_board = np.array([ [self.__conway_rule(self.board[row][col],self.__count_live_neighbors(row,col)) for col in range(self.num_cols)] for row in range(self.num_rows)])
         self.board = new_board
 
-        
+def pretty_string(self):
+    ''' Make ASCII representation of board. Use print(b.pretty_string()) for useful display. '''
+    return '\n'.join([''.join([str(x) for x in row]) for row in self.board])
+
