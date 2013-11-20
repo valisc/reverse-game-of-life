@@ -80,11 +80,11 @@ class Example:
 
     def evaluate(self, predicted_board):
         ''' Computer error rate of predicted start board. '''
-        if start_board is None:
+        if self.start_board is None:
             raise RuntimeError('Cannot evaluate an example with no start board.')
         # the magic of broadcasting ... maybe
-        errors = sum([label==predict for label,predict in np.nditer([start_board,predicted_board])])
-        return 1.0*errors/(self.num_rows*self.num_cols)
+        errors = sum([int(label)!=int(predict) for label,predict in np.nditer([self.start_board.board,predicted_board])])
+        return 1.0*errors/(self.start_board.num_rows*self.start_board.num_cols)
 
 
 # example creation routines
@@ -115,4 +115,33 @@ def create_examples(num_examples=1, deltas=list(range(1,6)),num_rows=20,num_cols
 
     
 
-        
+class Classifier:
+    ''' Default all-dead classifier and super-class for other reverse game of life solutions. 
+    usage:
+    >>> c = Classifier()
+    >>> c.train(train_examples)
+    >>> c.test(test_examples)
+    '''
+
+    
+    def __init__(self):
+        pass # all dead predictor needs to state
+
+    def train(self,examples):
+        pass # no training needed
+
+    def predict(self,end_board, delta):
+        ''' Returns classifiers prediction for ConwayBoard and given delta. '''
+        # this dummy classifier predicts all dead
+        prediction = np.empty([end_board.num_rows,end_board.num_cols],dtype=int)
+        prediction.fill(DEAD)
+        return prediction
+
+    def test(self,examples):
+        ''' Evaluate performance on test examples. Returns mean error rate. '''
+        total_error_rate = 0
+        for example in examples:
+            total_error_rate += example.evaluate(self.predict(example.end_board,example.delta))
+        return total_error_rate/len(examples)
+
+            
