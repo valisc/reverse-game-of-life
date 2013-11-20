@@ -145,3 +145,54 @@ class Classifier:
         return total_error_rate/len(examples)
 
             
+# TODO - not working at all ... need to create some unit tests for __make_features and a new __make_train_data
+class LocalClassifier:
+    ''' Predict each cell 1 at a time. '''
+
+    def __init__(self,window_size=1,off_board_value=0):
+        ''' LocalClassifier constructor. window_size is number of cells (in all 4 directions) to include in the features for predicting the center cell. So window_size=1 uses 3x3 chunks, =2 uses 5x5 chunks, and so on. off_board_value is the value to represent features that are outside the board, defaults to 0 (ie DEAD).'''
+        self.window_size = window_size
+        self.off_board_value = off_board_value
+
+    def __num_features(self):
+        return (2*self.window_size+1)**2
+
+    def __make_features(self,board,i,j):
+        ''' Creates features describing the (i,j) position. Returns numpy array of features.'''
+        features = np.empty(self.__num_features())
+        index = 0
+        (num_rows,num_cols) = board.shape
+        for delta_row in range(-self.window_size,self.window_size+1):
+            for delta_col in range(-self.window_size,self.window_size+1):
+                if i+delta_row>=0 and i+delta_row<num_rows and j+delta_col>=0 and j+delta_col<num_cols:
+                    features[index] = board[i+delta_row][j+delta_col]
+                else:
+                    features[index] = self.off_board_value
+                index += 1
+                
+        return features
+
+    def train(self, examples):
+        # create training data (x - features, y - labels
+
+        # assume all examples have same size
+        num_rows = examples[0].start_board.num_rows
+        num_cols = examples[0].end_board.num_cols
+        
+        x = np.empty([num_rows*num_cols*len(examples), self.__num_features()])
+        y = np.empty([nuM_rows*num_cols*len(examples),1])
+        
+        index = 0
+        for example in examples:
+            for i in range(num_rows):
+                for j in range(num_cols):
+                    # training features (the window around i,j) for
+                    # the i,j cell in this example
+                    x[index] = self.__make_features(example.end_board.board,i,j)
+                    y[index] = example.start_board.board[i][j]
+                    index += 1
+        return (x,y) # just for testing    
+        
+    
+    def predict(self,end_board, delta):
+        pass
