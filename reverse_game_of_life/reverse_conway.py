@@ -3,6 +3,9 @@
 # Released under GPL2 - see LICENCE for details
 
 import numpy as np
+from random import random
+from random import choice
+
 
 
 DEAD = 0
@@ -83,7 +86,32 @@ class Example:
         errors = sum([label==predict for label,predict in np.nditer([start_board,predicted_board])])
         return 1.0*errors/(self.num_rows*self.num_cols)
 
+
+# example creation routines
+def create_random_board(num_rows,num_cols,fill_percent):
+    ''' Returns a randomly initialzed ConwayBoard. '''
+    return ConwayBoard(board=[[ALIVE if random()<fill_percent else DEAD for j in range(num_cols)] for i in range(num_rows)])
+
+def create_example(num_rows, num_cols, delta, fill_percent,burn_in):
+    ''' Create an example for reverse game of life. '''
+    board = create_random_board(num_rows,num_cols,fill_percent)
+    # do burn in
+    for i in range(burn_in):
+        board.advance()
+    return Example(delta=delta, start_board=board.board)
+
+def create_examples(num_examples=1, deltas=list(range(1,6)),num_rows=20,num_cols=20,burn_in=5,min_fill=0.01,max_fill=0.99):
+    ''' Create examples for reverse game of life task. '''
+    example_list = list()
+    
+    while len(example_list) < num_examples:
+        e = create_example(num_rows,num_cols,choice(deltas), random()*(max_fill-min_fill)+min_fill,burn_in)
+        # keep only if end_board is non-empty
+        if (e.end_board.board==ALIVE).any():
+            example_list.append(e)
             
+    return example_list
+        
 
     
 
