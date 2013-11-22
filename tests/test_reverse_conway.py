@@ -68,6 +68,29 @@ class ConwayBoardTestCase(unittest.TestCase):
         b.advance()
         self.assert_array_equal(b.board,end)
 
+    def test_example_constructor(self):
+        ''' start and end board specified '''
+        start_board = [[0,0],[1,0]]
+        end_board = [[0,0],[0,0]]
+        example = Example(delta=1,start_board=start_board, end_board=end_board)
+        self.assertEqual(example.delta,1)
+        self.assert_array_equal(example.start_board.board,start_board)
+        self.assert_array_equal(example.end_board.board,end_board)
+        
+    def test_example_constructor_error(self):
+        ''' Constructor fails when no board specified. '''
+        self.assertRaises(ValueError, Example,(1))
+        
+    def test_example_evaluate(self):
+        ''' Example.evaluate() 3x3 board. '''
+        start_board = np.array([[0,1,0],[1,1,0],[0,1,1]])
+        end_board = np.array([[1,1,0],[1,0,0],[1,1,1]])
+        e = Example(delta=1,start_board=start_board,end_board=end_board)
+        self.assertAlmostEqual(e.evaluate([[0,0,0],[0,0,0],[0,0,0]]),5.0/9)
+        self.assertAlmostEqual(e.evaluate(start_board),0)
+        self.assertAlmostEqual(e.evaluate(end_board),3.0/9)
+
+
                                 
                                     
         

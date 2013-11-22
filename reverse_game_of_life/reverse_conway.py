@@ -73,10 +73,10 @@ class Example:
                 self.end_board.advance()
         elif start_board is None:
             self.start_board = None
-            self.end_board = ConwayBoard(end_board)
+            self.end_board = ConwayBoard(board=end_board)
         else:
-            self.start_board = ConwayBoard(start_board)
-            self.end_board = ConwayBoard(end_board)
+            self.start_board = ConwayBoard(board=start_board)
+            self.end_board = ConwayBoard(board=end_board)
 
     def evaluate(self, predicted_board):
         ''' Computer error rate of predicted start board. '''
