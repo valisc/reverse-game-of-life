@@ -2,9 +2,12 @@
 # Code to solve Conway's Reverse Game of Life
 # Released under GPL2 - see LICENCE for details
 
+from copy import copy
 import numpy as np
 from random import random
 from random import choice
+
+from sklearn.ensemble import RandomForestClassifier
 
 
 
@@ -145,21 +148,24 @@ class Classifier:
         return total_error_rate/len(examples)
 
             
-# TODO - not working at all ... need to create some unit tests for __make_features and a new __make_train_data
-class LocalClassifier:
+
+class LocalClassifier(Classifier):
     ''' Predict each cell 1 at a time. '''
 
-    def __init__(self,window_size=1,off_board_value=0):
-        ''' LocalClassifier constructor. window_size is number of cells (in all 4 directions) to include in the features for predicting the center cell. So window_size=1 uses 3x3 chunks, =2 uses 5x5 chunks, and so on. off_board_value is the value to represent features that are outside the board, defaults to 0 (ie DEAD).'''
+    def __init__(self,window_size=1,off_board_value=0,clf=RandomForestClassifier()):
+        ''' LocalClassifier constructor. window_size is number of cells (in all 4 directions) to include in the features for predicting the center cell. So window_size=1 uses 3x3 chunks, =2 uses 5x5 chunks, and so on. off_board_value is the value to represent features that are outside the board, defaults to 0 (ie DEAD). Copies of clf will be made and separate classifiers used for each unique delta.'''
         self.window_size = window_size
         self.off_board_value = off_board_value
+        self.base_classifier = clf
 
-    def __num_features(self):
+
+    def _num_features(self):
+        ''' Number of features used by this instance to classify each cell. '''
         return (2*self.window_size+1)**2
 
-    def __make_features(self,board,i,j):
+    def _make_features(self,board,i,j):
         ''' Creates features describing the (i,j) position. Returns numpy array of features.'''
-        features = np.empty(self.__num_features())
+        features = np.empty(self._num_features())
         index = 0
         (num_rows,num_cols) = board.shape
         for delta_row in range(-self.window_size,self.window_size+1):
@@ -172,27 +178,72 @@ class LocalClassifier:
                 
         return features
 
-    def train(self, examples):
-        # create training data (x - features, y - labels
-
+    
+    def make_training_data(self, examples):
+        ''' Make training data (x,y) from these examples using the setting for this LocalClassifier. '''
         # assume all examples have same size
-        num_rows = examples[0].start_board.num_rows
+        if len(examples)==0:
+            raise ValueError('examples must be non-empty')
+        if examples[0].end_board is None:
+            raise ValueError('all examples must have non-None end_board')
+        
+        num_rows = examples[0].end_board.num_rows
         num_cols = examples[0].end_board.num_cols
         
-        x = np.empty([num_rows*num_cols*len(examples), self.__num_features()])
-        y = np.empty([nuM_rows*num_cols*len(examples),1])
+        x = np.empty([num_rows*num_cols*len(examples), self._num_features()])
+        y = np.empty(num_rows*num_cols*len(examples))
         
         index = 0
         for example in examples:
+            if example.start_board is None:
+                raise ValueError('all examples must have non-None start_board')
+            if example.end_board is None:
+                raise ValueError('all examples must have non-None end_board')
             for i in range(num_rows):
                 for j in range(num_cols):
                     # training features (the window around i,j) for
                     # the i,j cell in this example
-                    x[index] = self.__make_features(example.end_board.board,i,j)
+                    x[index] = self._make_features(example.end_board.board,i,j)
                     y[index] = example.start_board.board[i][j]
                     index += 1
-        return (x,y) # just for testing    
+        return (x,y) 
+
+    def train(self, examples):
+        
+        self.classifiers = dict()
+        
+        deltas = set([e.delta for e in examples])
+        
+        for delta in deltas:
+            # training data for current delta
+            (train_x,train_y) = self.make_training_data([e for e in examples if e.delta==delta])
+            # create classifier with same params as base classifier
+            clf = copy(self.base_classifier)
+            
+            # fit
+            clf.fit(train_x,train_y)
+            # store
+            self.classifiers[delta] = clf
+        
         
     
     def predict(self,end_board, delta):
-        pass
+        if delta not in self.classifiers:
+            raise ValueError('Unable to predict delta='+str(delta)+', no training data for that delta')
+        
+        clf = self.classifiers[delta]
+
+        (num_rows,num_cols) = end_board.board.shape
+        
+        prediction = np.empty([num_rows,num_cols],dtype='int')
+        
+        # make prdiction for each cell
+        for row in range(num_rows):
+            for col in range(num_cols):
+                x = self._make_features(end_board.board,row,col)
+                prediction[row][col] = clf.predict(x)
+
+        return prediction
+
+        
+        

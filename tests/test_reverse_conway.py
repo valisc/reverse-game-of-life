@@ -13,7 +13,7 @@ from reverse_game_of_life import *
 
 class ConwayBoardTestCase(unittest.TestCase):
     def assert_array_equal(self, a1, a2):        
-        self.assertTrue(np.array_equal(a1,a2))
+        self.assertTrue(np.array_equal(a1,a2),repr(a1) + " != " + repr(a2))
 
     def test_constructor_blank(self):
         ''' Dead board constructor. '''
@@ -91,6 +91,35 @@ class ConwayBoardTestCase(unittest.TestCase):
         self.assertAlmostEqual(e.evaluate(end_board),3.0/9)
 
 
-                                
+
+    def test_localclassifier_make_features(self):
+        ''' LocalClassifier._make_features() '''
+        # 000
+        # 011
+        # 011
+        lc = LocalClassifier(window_size=1,off_board_value=0)
+        board = np.array([[0,0,0],[0,1,1],[0,1,1]])
+        self.assert_array_equal(lc._make_features(board,0,0),
+                                [0,0,0,0,0,0,0,0,1])
+        self.assert_array_equal(lc._make_features(board,1,1),
+                                [0,0,0,0,1,1,0,1,1])
+        
+
+    def test_localclassifier_make_training_data(self):
+        '''' LocalClassifier.make_training_data() '''
+        # 10
+        # 01
+        lc = LocalClassifier(window_size=1,off_board_value=0)
+        # NOTE: end board is not one conway step of start board
+        examples = [Example(delta=1,start_board=[[1,0],[0,1]],end_board=[[1,0],[0,1]])]
+        expected_x = np.array([ [0,0,0,0,1,0,0,0,1],
+                                [0,0,0,1,0,0,0,1,0],
+                                [0,1,0,0,0,1,0,0,0],
+                                [1,0,0,0,1,0,0,0,0]])
+        expected_y = np.array([1,0,0,1])
+        
+        (x,y) = lc.make_training_data(examples)
+        self.assert_array_equal(x,expected_x)
+        self.assert_array_equal(y,expected_y)
                                     
         
