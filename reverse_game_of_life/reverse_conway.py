@@ -59,6 +59,9 @@ class ConwayBoard:
         ''' Make ASCII representation of board. Use print(b.pretty_string()) for useful display. '''
         return '\n'.join([''.join([str(x) for x in row]) for row in self.board])
 
+    def __str__(self):
+        ''' Automatic string printing using str(conway_board). '''
+        return self.pretty_string()
 
 
 class Example:
@@ -89,6 +92,10 @@ class Example:
         # the magic of broadcasting ... maybe
         errors = sum([int(label)!=int(predict) for label,predict in np.nditer([self.start_board.board,predicted_board])])
         return 1.0*errors/(self.start_board.num_rows*self.start_board.num_cols)
+
+    def __str__(self):
+        ''' A human readable string representation. '''
+        return 'delta='+str(self.delta)+'\nstart board:\n'+str(self.start_board)+'\nend_board:\n'+str(self.end_board)
 
 
 # example creation routines
