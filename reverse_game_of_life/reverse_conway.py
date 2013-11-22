@@ -2,6 +2,7 @@
 # Code to solve Conway's Reverse Game of Life
 # Released under GPL2 - see LICENCE for details
 
+import time
 from copy import copy
 import numpy as np
 from random import random
@@ -142,9 +143,13 @@ class Classifier:
 
     def test(self,examples):
         ''' Evaluate performance on test examples. Returns mean error rate. '''
+        time_start = time.time()
         total_error_rate = 0
         for example in examples:
             total_error_rate += example.evaluate(self.predict(example.end_board,example.delta))
+        time_end = time.time()
+        print('tested in {0} seconds'.format(time_end-time_start))
+
         return total_error_rate/len(examples)
 
             
@@ -209,13 +214,14 @@ class LocalClassifier(Classifier):
         return (x,y) 
 
     def train(self, examples):
-        
+        time_start = time.time()
+
         self.classifiers = dict()
         
         deltas = set([e.delta for e in examples])
         
         for delta in deltas:
-            # training data for current delta
+            # training data for current delta            
             (train_x,train_y) = self.make_training_data([e for e in examples if e.delta==delta])
             # create classifier with same params as base classifier
             clf = copy(self.base_classifier)
@@ -224,6 +230,10 @@ class LocalClassifier(Classifier):
             clf.fit(train_x,train_y)
             # store
             self.classifiers[delta] = clf
+
+        time_end = time.time()
+        print('trained in {0} seconds'.format(time_end-time_start))
+
         
         
     
@@ -235,15 +245,21 @@ class LocalClassifier(Classifier):
 
         (num_rows,num_cols) = end_board.board.shape
         
-        prediction = np.empty([num_rows,num_cols],dtype='int')
-        
-        # make prdiction for each cell
+        # make all cell predictions at once (row-major order)
+        x = np.empty([num_rows*num_cols,self._num_features()])
+        # populate x
+        index = 0
         for row in range(num_rows):
             for col in range(num_cols):
-                x = self._make_features(end_board.board,row,col)
-                prediction[row][col] = clf.predict(x)
-
-        return prediction
+                x[index] = self._make_features(end_board.board,row,col)
+                index += 1
+        
+        # predict
+        y_hat = clf.predict(x)
+        # reshape into board
+        predictions = y_hat.reshape((num_rows,num_cols))
+        return predictions
+        
 
         
         
