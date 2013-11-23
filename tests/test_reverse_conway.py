@@ -2,8 +2,8 @@
 # Test code for reverse_conway.py
 # Released under GPL2 - see LICENCE for details
 
-# usage (auto discovery):
-#    python3 -m unittest discover
+# usage:
+#  $ nosetests
 
 import numpy as np
 
@@ -104,6 +104,28 @@ class ConwayBoardTestCase(unittest.TestCase):
         self.assert_array_equal(lc._make_features(board,1,1),
                                 [0,0,0,0,1,1,0,1,1])
         
+    def test_localclassifier_make_features2(self):
+        ''' LocalClassifier._make_features() '''
+        # 000
+        # 011
+        # 100
+        lc = LocalClassifier(window_size=1,off_board_value=-1)
+        board = np.array([[0,0,0],[0,1,1],[1,0,0]])
+        self.assert_array_equal(lc._make_features(board,0,0,transform=0),
+                                [-1,-1,-1,-1,0,0,-1,0,1])
+        all_transforms = [
+            [0,0,0,0,1,1,1,0,0], # original
+            [1,0,0,0,1,0,0,1,0], # clockwise 90
+            [0,0,1,1,1,0,0,0,0], # clockwise 180
+            [0,1,0,0,1,0,0,0,1], # clockwise 270
+            [0,0,0,1,1,0,0,0,1], # flip vertical
+            [0,1,0,0,1,0,1,0,0], # flip and 90
+            [1,0,0,0,1,1,0,0,0], # flip and 180
+            [0,0,1,0,1,0,0,1,0]] # flip and 270
+
+        received = set([tuple(lc._make_features(board,1,1,transform=i)) for i in range(8)])
+        expected = set([tuple([float(i) for i in x]) for x in all_transforms])
+        self.assertEqual(received,expected)
 
     def test_localclassifier_make_training_data(self):
         '''' LocalClassifier.make_training_data() '''

@@ -203,7 +203,8 @@ class Classifier:
                 delta_error_rates[example.delta] = 0                
             delta_counts[example.delta] += 1
             delta_error_rates[example.delta] += error_rate
-            
+
+        time_end = time.time()            
         print('testing completed in {0} seconds'.format(time_end-time_start))
         
         # print detailed performance
@@ -212,7 +213,7 @@ class Classifier:
             for delta in sorted(delta_counts.keys()):
                 print('{0}\t{1}\t{2}'.format(delta,delta_counts[delta],delta_error_rates[delta]/delta_counts[delta]))
             print('{0}\t{1}\t{2}'.format('all',len(examples),total_error_rate/len(examples)))
-        time_end = time.time()
+
 
 
         return total_error_rate/len(examples)
@@ -233,8 +234,8 @@ class LocalClassifier(Classifier):
         ''' Number of features used by this instance to classify each cell. '''
         return (2*self.window_size+1)**2
 
-    def _make_features(self,board,i,j):
-        ''' Creates features describing the (i,j) position. Returns numpy array of features.'''
+    def _make_features(self,board,i,j,transform=0):
+        ''' Creates features describing the (i,j) position. Returns numpy array of features. Use transformation to convert feature representation to the 8 possible rotations and reflections.'''
         features = np.empty(self._num_features())
         index = 0
         (num_rows,num_cols) = board.shape
@@ -246,10 +247,22 @@ class LocalClassifier(Classifier):
                     features[index] = self.off_board_value
                 index += 1
                 
+        if transform>0:
+            # convert back to 2d array
+            a = features.reshape(2*self.window_size+1,2*self.window_size+1)
+            # transform
+            # flip if needed
+            if transform>=4:
+                a = np.fliplr(a)
+            # rotate
+            a = np.rot90(a,transform%4)
+            # back to 1d
+            features = a.flatten()
+
         return features
 
     
-    def make_training_data(self, examples):
+    def make_training_data(self, examples, use_transformations=False):
         ''' Make training data (x,y) from these examples using the setting for this LocalClassifier. '''
         # assume all examples have same size
         if len(examples)==0:
@@ -260,8 +273,12 @@ class LocalClassifier(Classifier):
         num_rows = examples[0].end_board.num_rows
         num_cols = examples[0].end_board.num_cols
         
-        x = np.empty([num_rows*num_cols*len(examples), self._num_features()])
-        y = np.empty(num_rows*num_cols*len(examples))
+        copies_per = 1
+        if use_transformations:
+            copies_per = 8
+
+        x = np.empty([copies_per*num_rows*num_cols*len(examples), self._num_features()])
+        y = np.empty(copies_per*num_rows*num_cols*len(examples))
         
         index = 0
         for example in examples:
@@ -273,12 +290,13 @@ class LocalClassifier(Classifier):
                 for j in range(num_cols):
                     # training features (the window around i,j) for
                     # the i,j cell in this example
-                    x[index] = self._make_features(example.end_board.board,i,j)
-                    y[index] = example.start_board.board[i][j]
-                    index += 1
+                    for t in range(copies_per):
+                        x[index] = self._make_features(example.end_board.board,i,j,t)
+                        y[index] = example.start_board.board[i][j]
+                        index += 1
         return (x,y) 
 
-    def train(self, examples):
+    def train(self, examples, use_transformations=False):
         time_start = time.time()
 
         self.classifiers = dict()
@@ -287,7 +305,7 @@ class LocalClassifier(Classifier):
         
         for delta in deltas:
             # training data for current delta            
-            (train_x,train_y) = self.make_training_data([e for e in examples if e.delta==delta])
+            (train_x,train_y) = self.make_training_data([e for e in examples if e.delta==delta],use_transformations=use_transformations)
             # create classifier with same params as base classifier
             clf = copy(self.base_classifier)
             
