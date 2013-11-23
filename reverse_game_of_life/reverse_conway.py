@@ -9,7 +9,6 @@ import numpy as np
 from random import random
 from random import choice
 
-
 DEAD = 0
 ALIVE = 1
 
@@ -158,11 +157,3 @@ def load_examples(file_name,num_rows=20,num_cols=20):
         
         return examples
 
-                
-            
-                            
-
-        
-
-        
-        
