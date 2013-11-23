@@ -1,9 +1,2 @@
-from .reverse_conway import ConwayBoard
-from .reverse_conway import Example
-from .reverse_conway import create_examples
-from .reverse_conway import load_examples
-
-
-from .reverse_conway import Classifier
-from .reverse_conway import LocalClassifier
-
+from .reverse_conway import ConwayBoard, Example, create_examples, load_examples
+from .classifier.classifier import Classifier, LocalClassifier
