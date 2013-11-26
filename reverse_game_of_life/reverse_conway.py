@@ -168,10 +168,10 @@ def save_examples(file_name,examples,predictions):
         
         (num_rows,num_cols) = examples[0].end_board.board.shape
         # header row
-        header = ['id'] + ['start'+str(i) for i in range(num_rows*num_cols)]
+        header = ['id'] + ['start.'+str(i+1) for i in range(num_rows*num_cols)]
         writer.writerow(header)
         for (example,prediction) in zip(examples,predictions):
-            row = [str(example.kaggle_id)] + [str(v) for v in prediction.flatten()]
+            row = [str(example.kaggle_id)] + [str(int(v)) for v in prediction.flatten()]
             writer.writerow(row)
 
         
