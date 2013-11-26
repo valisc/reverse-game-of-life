@@ -65,7 +65,7 @@ class Example:
 
     def __init__(self,delta, start_board=None,end_board=None,kaggle_id=None):
         ''' Construct an example, delta is required, start and end, or just one board can be supplied. If only start is supplied, the end board is computed, if only end board is supplied then no evaluation is possible. '''
-        self.kaggle_id = None
+        self.kaggle_id = kaggle_id
         self.delta = delta
         if start_board is None and end_board is None:
             raise ValueError('start_board and end_board cannot both be None')
@@ -157,3 +157,21 @@ def load_examples(file_name,num_rows=20,num_cols=20):
         
         return examples
 
+# kaggle format example writing, ie predictions
+# get predictions and save from a classifer by
+# >>> predictions = [classifier.predict(e.end_board,e.delta) for e in examples]
+# >>> save_examples('file.csv',examples,predictions)
+def save_examples(file_name,examples,predictions):
+    ''' Save predictions in kaggle format. '''
+    with open(file_name,'w') as csvfile:
+        writer = csv.writer(csvfile)
+        
+        (num_rows,num_cols) = examples[0].end_board.board.shape
+        # header row
+        header = ['id'] + ['start'+str(i) for i in range(num_rows*num_cols)]
+        writer.writerow(header)
+        for (example,prediction) in zip(examples,predictions):
+            row = [str(example.kaggle_id)] + [str(v) for v in prediction.flatten()]
+            writer.writerow(row)
+
+        
