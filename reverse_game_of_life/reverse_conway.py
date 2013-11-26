@@ -139,7 +139,7 @@ def load_examples(file_name,num_rows=20,num_cols=20):
             index = 2
             while index<len(ex_data):
                 # read board
-                a = np.array(ex_data[index:(index+num_rows*num_cols)])
+                a = np.array(ex_data[index:(index+num_rows*num_cols)],dtype='int')
                 # reshape
                 board = a.reshape((num_rows,num_cols))
                 # store in appropriate variable

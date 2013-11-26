@@ -2,6 +2,10 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 import  time
 from collections import Counter
+from copy import copy
+
+from ..reverse_conway import DEAD,ALIVE
+
 
 class Classifier:
     ''' Default all-dead classifier and super-class for other reverse game of life solutions. 
@@ -139,8 +143,6 @@ class LocalClassifier(Classifier):
         if use_transformations:
             copies_per = 8
 
-        x = np.empty([copies_per*num_rows*num_cols*len(examples), self._num_features()])
-        y = np.empty(copies_per*num_rows*num_cols*len(examples))
         
         data_counter = Counter()
         
@@ -222,7 +224,7 @@ class LocalClassifier(Classifier):
         print('training data created in {0} seconds'.format(time_end-time_start))
         return (x,y) 
 
-    def train(self, examples, use_transformations=False):
+    def train(self, examples, use_transformations=False,use_weights=True):
         time_start = time.time()
 
         self.classifiers = dict()
@@ -230,13 +232,25 @@ class LocalClassifier(Classifier):
         deltas = set([e.delta for e in examples])
         
         for delta in deltas:
-            # training data for current delta            
-            (train_x,train_y) = self.make_training_data([e for e in examples if e.delta==delta],use_transformations=use_transformations)
             # create classifier with same params as base classifier
             clf = copy(self.base_classifier)
             
-            # fit
-            clf.fit(train_x,train_y)
+            if use_weights:
+                # weighted training data for current delta
+                # training data for current delta            
+                (train_x,train_y,train_w) = self.make_weighted_training_data([e for e in examples if e.delta==delta],use_transformations=use_transformations) 
+                print ('delta={0}, training with {1} weighted examples'.format(delta,len(train_x)))
+                # fit
+                clf.fit(train_x,train_y,train_w)
+
+            else:
+                # training data for current delta            
+                (train_x,train_y) = self.make_training_data([e for e in examples if e.delta==delta],use_transformations=use_transformations)            
+                print ('delta={0}, training with {1} examples'.format(delta,len(train_x)))
+                # fit
+                clf.fit(train_x,train_y)
+
+
             # store
             self.classifiers[delta] = clf
 
@@ -257,11 +271,7 @@ class LocalClassifier(Classifier):
         # make all cell predictions at once (row-major order)
         x = np.empty([num_rows*num_cols,self._num_features()])
         # populate x
-        index = 0
-        for row in range(num_rows):
-            for col in range(num_cols):
-                x[index] = self._make_features(end_board.board,row,col)
-                index += 1
+        x = self._make_features_board(end_board.board)
         
         # predict
         y_hat = clf.predict(x)
