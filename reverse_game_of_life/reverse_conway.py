@@ -35,21 +35,32 @@ class ConwayBoard:
         else:
             return DEAD
 
-    def __count_live_neighbors(self,row,col):
-        ''' Count number of living neighbors of cell (row,col) in current board. '''
-        count = 0
-        for r in range(row-1,row+2):
-            for c in range(col-1,col+2):
-                if (r!=row or c!=col) and r>=0 and r<self.num_rows and c>=0 and c<self.num_cols and self.board[r][c]==ALIVE:
-                    count += 1
-        return count
-                    
+    def __count_live_neighbors(self):
+        '''
+        Count number of living neighbors for all cells in current board.
+        Returns array of all neighboring cells
+        http://www.loria.fr/~rougier/teaching/numpy/scripts/game-of-life-numpy.py
+        '''
+        Z = np.pad(self.board, 1, 'constant')
+        # summation of the 8 translations of the GoL board
+        census = (Z[0:-2,0:-2] + Z[0:-2,1:-1] + Z[0:-2,2:] +
+                  Z[1:-1,0:-2] +                Z[1:-1,2:] +
+                  Z[2:  ,0:-2] + Z[2:  ,1:-1] + Z[2:  ,2:])
+        return census
     
     # advance board by 1 step of conway's game of life
     def advance(self):
-        ''' Advance board by 1 step using Conway's Game of Life rules.'''
-        new_board = np.array([ [self.__conway_rule(self.board[row][col],self.__count_live_neighbors(row,col)) for col in range(self.num_cols)] for row in range(self.num_rows)])
-        self.board = new_board
+        '''
+        Advance board by 1 step using Conway's Game of Life rules.
+        http://www.loria.fr/~rougier/teaching/numpy/scripts/game-of-life-numpy.py
+        '''
+        census = self.__count_live_neighbors()
+        # Create boolean matrix based on GoL rules
+        birth = (census == 3) & (self.board == 0)
+        survive = ((census == 2) | (census == 3)) & (self.board == 1)
+
+        self.board[...] = 0 # clear board to zero Ie no reallocate memory
+        self.board[birth|survive] = 1 # Apply boolean mask to board
 
     def pretty_string(self):
         ''' Make ASCII representation of board. Use print(b.pretty_string()) for useful display. '''
