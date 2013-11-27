@@ -69,7 +69,8 @@ class LocalClassifier(Classifier):
         self.window_size = window_size
         self.off_board_value = off_board_value
         self.base_classifier = clf
-
+        self.classifiers = dict()
+        
     def _transform_board(self,board,transform=0):
         if transform==0:
             return board
