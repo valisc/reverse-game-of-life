@@ -232,13 +232,15 @@ class LocalClassifier(Classifier):
             clf.fit(x_train,y_train)
         else:
             clf.fit(x_train,y_train,w_train)
+        
         # evaluate
         score = self._score(clf,x_test,y_test,w_test)
-        
+
+            
         return score,parameters
     
 
-    def tune_and_train(self, examples, param_grid, use_transformations=False, use_weights=True,tune_perc=0.5):
+    def tune_and_train(self, examples, param_grid, use_transformations=False, use_weights=True,tune_perc=0.5,verbosity=0):
         '''Tune parameters and then train using best parameters. 
 
         param_grid - list of dicts with setting configurations to try,
@@ -281,13 +283,15 @@ class LocalClassifier(Classifier):
             self.grid_scores[delta] = [self._fit_grid_point(x_train,y_train,w_train,x_test,y_test,w_test,self.base_classifier,parameters) for parameters in ParameterGrid(param_grid)]
 
             (best_scores,best_params) = sorted(self.grid_scores[delta],key=lambda x:x[0], reverse=True)[0]
-            print(best_params)
+            if verbosity>1:
+                print('best params for delta={0} are {1} with score of {2}',format(delta,str(best_params),str(best_scores)))
+                
             self.best_scores[delta] = best_scores
             self.best_params[delta] = best_params
             
 
             # fit on entire data
-
+            
             clf = clone(self.base_classifier)
             clf.set_params(**best_params)
             
@@ -303,7 +307,8 @@ class LocalClassifier(Classifier):
             
         
         time_end = time.time()
-        print('training completed in {0} seconds'.format(time_end-time_start))
+        if verbosity>0:
+            print('tuning and training completed in {0} seconds'.format(time_end-time_start))
         
     
     def predict(self,end_board, delta):
