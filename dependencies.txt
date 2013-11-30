@@ -3,3 +3,4 @@ nose >= 1.3.0
 scikit-learn >= 0.14
 pylint >= 1.0.0
 scipy >= 0.7.0 # required by scikit-learn
+-e git+https://github.com/icoz/pybrain@a466e0295fb7938b55d41befe4bfde518c0e00a0#egg=PyBrain-master
