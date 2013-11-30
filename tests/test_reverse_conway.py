@@ -68,6 +68,16 @@ class ConwayBoardTestCase(unittest.TestCase):
         b.advance()
         self.assert_array_equal(b.board,end)
 
+    def test_unique_arrays(self):
+        # ensure each conway board (even if created from the same
+        # nparray) has it's own array copy and so advancing one
+        # doesn't advance the other
+        start = np.array([[0,1,0],[1,0,0],[0,0,1]])
+        b1 = ConwayBoard(board=start)
+        b2 = ConwayBoard(board=start)
+        b1.advance()
+        self.assertFalse(np.array_equal(b1.board,b2.board),"ConwayBoards share common array.")
+
     def test_example_constructor(self):
         ''' start and end board specified '''
         start_board = [[0,0],[1,0]]

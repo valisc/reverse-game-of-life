@@ -23,7 +23,8 @@ class ConwayBoard:
         else:            
             self.num_rows = len(board)
             self.num_cols = len(board[0])
-            self.board = np.asarray(board)
+            # needs it's own copy so advance doesn't change other conwayboards
+            self.board = np.array(board,copy=True)
            
 
     def __conway_rule(self,cur_state, live_neighbors):
