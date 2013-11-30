@@ -94,3 +94,15 @@ class LocalClassifierTestCase(unittest.TestCase):
         self.assertEqual(result.shape,(20,20))
         # all 0s or 1s
         self.assertTrue(((result==1) | (result==0)).all())
+
+        
+    def test_tune_and_train(self):
+        examples = create_examples(num_examples=10,deltas=[1])
+        self.classifier.tune_and_train(examples,[{'n_estimators':[1,2]}])      
+
+        self.assertTrue(1 in self.classifier.classifiers)
+
+        self.classifier.tune_and_train(examples,[{'n_estimators':[1,2],'max_depth':[2,3]}])      
+
+        self.assertTrue(1 in self.classifier.classifiers)
+        

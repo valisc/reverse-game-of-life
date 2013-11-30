@@ -1,11 +1,13 @@
 import numpy as np
 import  time
 
-from copy import copy
 
 from collections import Counter
 from .classifier import Classifier
+from sklearn import clone
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.grid_search import ParameterGrid
+from random import shuffle
 
 class LocalClassifier(Classifier):
     ''' Predict each cell 1 at a time. '''
@@ -180,7 +182,7 @@ class LocalClassifier(Classifier):
         
         for delta in deltas:
             # create classifier with same params as base classifier
-            clf = copy(self.base_classifier)
+            clf = clone(self.base_classifier)
             
             if use_weights:
                 # weighted training data for current delta
@@ -204,7 +206,104 @@ class LocalClassifier(Classifier):
         time_end = time.time()
         print('training completed in {0} seconds'.format(time_end-time_start))
 
+    def _score(self,clf,x,y,w=None):
+        '''General score function to handle weighted or unweighted examples,
+        returns accuracy.
+
+        '''
+
+        if w is None:
+            return clf.score(x,y)
+        else:
+            return np.dot(clf.predict(x)==y,w)/np.sum(w)
         
+        
+
+    def _fit_grid_point(self, x_train,y_train,w_train,x_test,y_test,w_test,base_estimator,parameters):
+        '''Fit a classifier for particular parameter settings. Modeled after
+        grid_seary.py from sklearn.
+        '''
+
+        # setup classifierN
+        clf = clone(base_estimator)
+        clf.set_params(**parameters)
+        # fit
+        if w_train is None:
+            clf.fit(x_train,y_train)
+        else:
+            clf.fit(x_train,y_train,w_train)
+        # evaluate
+        score = self._score(clf,x_test,y_test,w_test)
+        
+        return score,parameters
+    
+
+    def tune_and_train(self, examples, param_grid, use_transformations=False, use_weights=True,tune_perc=0.5):
+        '''Tune parameters and then train using best parameters. 
+
+        param_grid - list of dicts with setting configurations to try,
+        e.g. [{'n_estimators':[10,20,30],'max_depth':[5,10,15]}]
+        
+        tune_perc - percentage of examples to use for tuning
+
+        '''
+
+        time_start = time.time()
+        
+        self.classifiers = dict()
+        self.grid_scores = dict()
+        self.best_scores = dict()
+        self.best_params = dict()
+        
+        deltas = set([e.delta for e in examples])
+        
+        for delta in deltas:
+            cur_examples = [e for e in examples if e.delta==delta]
+            
+            # train/test split
+            cutoff = int(len(cur_examples)*tune_perc)
+            # random ordering
+            shuffle(cur_examples)
+            
+            if use_weights:
+                (x_train,y_train,w_train) = self.make_weighted_training_data(cur_examples[0:cutoff],use_transformations=use_transformations)
+                (x_test,y_test,w_test) = self.make_weighted_training_data(cur_examples[cutoff:len(examples)],use_transformations=use_transformations)
+            else:
+                (x_train,y_train) = self.make_training_data(cur_examples[0:cutoff],use_transformations=use_transformations)
+                (x_test,y_test) = self.make_training_data(cur_examples[cutoff:len(examples)],use_transformations=use_transformations)
+                w_test = None
+                w_train = None
+                                        
+
+            
+            # fit each parameter setting using ParameterGrid from
+            # sklearn.grid_search to cycle through the possibilities
+            self.grid_scores[delta] = [self._fit_grid_point(x_train,y_train,w_train,x_test,y_test,w_test,self.base_classifier,parameters) for parameters in ParameterGrid(param_grid)]
+
+            (best_scores,best_params) = sorted(self.grid_scores[delta],key=lambda x:x[0], reverse=True)[0]
+            print(best_params)
+            self.best_scores[delta] = best_scores
+            self.best_params[delta] = best_params
+            
+
+            # fit on entire data
+
+            clf = clone(self.base_classifier)
+            clf.set_params(**best_params)
+            
+            if use_weights:
+                (x,y,w) = self.make_weighted_training_data(cur_examples,use_transformations=use_transformations)
+                clf.fit(x,y,w)
+            else:
+                (x,y) = self.make_training_data(cur_examples,use_transformations=use_transformations)
+                clf.fit(x,y)
+                
+            # store
+            self.classifiers[delta] = clf
+            
+        
+        time_end = time.time()
+        print('training completed in {0} seconds'.format(time_end-time_start))
         
     
     def predict(self,end_board, delta):
