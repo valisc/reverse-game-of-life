@@ -1,3 +1,3 @@
 from .classifier import Classifier
-from .classifier import LocalClassifier
-from .classifier import ANNClassifier
+from .local_classifier import LocalClassifier
+from .ann_classifier import ANNClassifier
