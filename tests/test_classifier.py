@@ -23,7 +23,7 @@ class ClassifierTestCase(unittest.TestCase):
         self.assert_array_equal(received,expected)
         
     def test_test(self):
-        examples = [Example(delta=1,start_board=[[0,1,1],[1,1,0],[0,0,1]])]
+        examples = [KaggleExample(delta=1,start_board=[[0,1,1],[1,1,0],[0,0,1]])]
         self.assertAlmostEqual(self.classifier.test(examples), 5./9)
         
 
@@ -73,7 +73,7 @@ class LocalClassifierTestCase(unittest.TestCase):
         # 01
         lc = LocalClassifier(window_size=1,off_board_value=0)
         # NOTE: end board is not one conway step of start board
-        examples = [Example(delta=1,start_board=[[1,1],[0,1]],end_board=[[1,0],[0,1]])]
+        examples = [KaggleExample(delta=1,start_board=[[1,1],[0,1]],end_board=[[1,0],[0,1]])]
         expected_x = np.array([ [-1,-1,-1,-1,1,0,-1,0,1],
                                 [-1,-1,-1,1,0,-1,0,1,-1],
                                 [-1,1,0,-1,0,1,-1,-1,-1],
@@ -89,7 +89,7 @@ class LocalClassifierTestCase(unittest.TestCase):
         # 01
         lc = LocalClassifier(window_size=1,off_board_value=0)
         # NOTE: end board is not one conway step of start board
-        examples = [Example(delta=1,start_board=[[1,1],[0,1]],end_board=[[1,0],[0,1]])]
+        examples = [KaggleExample(delta=1,start_board=[[1,1],[0,1]],end_board=[[1,0],[0,1]])]
         expected_x = np.array([ [0,0,0,0,1,0,0,0,1],
                                 [0,0,0,1,0,0,0,1,0],
                                 [0,1,0,0,0,1,0,0,0],

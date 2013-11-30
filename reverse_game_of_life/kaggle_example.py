@@ -1,79 +1,17 @@
-#!/usr/bin/python3
-# Code to solve Conway's Reverse Game of Life
-# Released under GPL2 - see LICENCE for details
 
 import csv
-import time
-from copy import copy
+
 import numpy as np
-from random import random
-from random import choice
+from random import random,choice
 
-DEAD = 0
-ALIVE = 1
+from .conway_board import ConwayBoard,ALIVE,DEAD
 
-class ConwayBoard:
-    def __init__(self,rows=0,cols=0,board=None):
-        '''Conway Board constructor. Construct all dead board by specifiying rows and cols or initialize by specifying board.'''
-        if board is None:
-            self.num_rows = rows
-            self.num_cols = cols
-            self.board = np.empty([self.num_rows,self.num_cols],dtype=int)
-            self.board.fill(DEAD)
-        else:            
-            self.num_rows = len(board)
-            self.num_cols = len(board[0])
-            # needs it's own copy so advance doesn't change other conwayboards
-            self.board = np.array(board,copy=True)
-           
+class KaggleExample:
+    '''A reverse conway example for kaggle compeition, stores the
+    starting board (if known), the ending board, and the delta steps
+    between start and end.
 
-    def __conway_rule(self,cur_state, live_neighbors):
-        ''' Returns next state in Conway Game of Life for given current state and number of living neighbors. '''
-        if cur_state==DEAD and live_neighbors==3:
-            return ALIVE
-        elif cur_state==ALIVE and (live_neighbors==3 or live_neighbors==2):
-            return ALIVE
-        else:
-            return DEAD
-
-    def __count_live_neighbors(self):
-        '''
-        Count number of living neighbors for all cells in current board.
-        Returns array of all neighboring cells
-        http://www.loria.fr/~rougier/teaching/numpy/scripts/game-of-life-numpy.py
-        '''
-        Z = np.pad(self.board, 1, 'constant')
-        # summation of the 8 translations of the GoL board
-        census = (Z[0:-2,0:-2] + Z[0:-2,1:-1] + Z[0:-2,2:] +
-                  Z[1:-1,0:-2] +                Z[1:-1,2:] +
-                  Z[2:  ,0:-2] + Z[2:  ,1:-1] + Z[2:  ,2:])
-        return census
-    
-    # advance board by 1 step of conway's game of life
-    def advance(self):
-        '''
-        Advance board by 1 step using Conway's Game of Life rules.
-        http://www.loria.fr/~rougier/teaching/numpy/scripts/game-of-life-numpy.py
-        '''
-        census = self.__count_live_neighbors()
-        # Create boolean matrix based on GoL rules
-        birth = (census == 3) & (self.board == 0)
-        survive = ((census == 2) | (census == 3)) & (self.board == 1)
-
-        self.board[...] = 0 # clear board to zero Ie no reallocate memory
-        self.board[birth|survive] = 1 # Apply boolean mask to board
-
-    def pretty_string(self):
-        ''' Make ASCII representation of board. Use print(b.pretty_string()) for useful display. '''
-        return '\n'.join([''.join([str(x) for x in row]) for row in self.board])
-
-    def __str__(self):
-        ''' Automatic string printing using str(conway_board). '''
-        return self.pretty_string()
-
-
-class Example:
-    ''' A reverse conway example, stores the starting board (if known), the ending board, and the delta steps between start and end. '''
+    '''
 
     def __init__(self,delta, start_board=None,end_board=None,kaggle_id=None):
         ''' Construct an example, delta is required, start and end, or just one board can be supplied. If only start is supplied, the end board is computed, if only end board is supplied then no evaluation is possible. '''
@@ -109,7 +47,7 @@ class Example:
 
 # example creation routines
 def create_random_board(num_rows,num_cols,fill_percent):
-    ''' Returns a randomly initialzed ConwayBoard. '''
+    ''' Create a randomly initialzed ConwayBoard. '''
     return ConwayBoard(board=[[ALIVE if random()<fill_percent else DEAD for j in range(num_cols)] for i in range(num_rows)])
 
 def create_example(num_rows, num_cols, delta, fill_percent,burn_in):
@@ -118,7 +56,7 @@ def create_example(num_rows, num_cols, delta, fill_percent,burn_in):
     # do burn in
     for i in range(burn_in):
         board.advance()
-    return Example(delta=delta, start_board=board.board)
+    return KaggleExample(delta=delta, start_board=board.board)
 
 def create_examples(num_examples=1, deltas=list(range(1,6)),num_rows=20,num_cols=20,burn_in=5,min_fill=0.01,max_fill=0.99):
     ''' Create examples for reverse game of life task. '''
@@ -164,7 +102,7 @@ def load_examples(file_name,num_rows=20,num_cols=20):
 
                 index += num_rows*num_cols
                 
-            examples.append(Example(kaggle_id=ex_id, delta=delta, start_board=start_board, end_board=end_board))
+            examples.append(KaggleExample(kaggle_id=ex_id, delta=delta, start_board=start_board, end_board=end_board))
 
         
         return examples

@@ -3,7 +3,7 @@ from sklearn.ensemble import RandomForestClassifier
 import  time
 from collections import Counter
 from copy import copy
-from ..reverse_conway import DEAD,ALIVE
+from ..conway_board import DEAD,ALIVE
 
 from pybrain.tools.shortcuts import buildNetwork
 from pybrain.datasets import SupervisedDataSet
