@@ -38,24 +38,6 @@ class LocalClassifier(Classifier):
         ''' Number of features used by this instance to classify each cell. '''
         return (2*self.window_size+1)**2
 
-    def _make_neighbor_features_cell(self,board,i,j):
-        '''
-        Create features of neighborhood around the (i,j) position. Returns numpy array of features.  NOTE: If getting
-        neighborhoods for all positions on a board, use the _make_neighbor_features_board method which is much more
-        efficient.
-        '''
-        features = np.empty((self.window_size*2+1)**2)
-        index = 0
-        (num_rows,num_cols) = board.shape
-        for delta_row in range(-self.window_size,self.window_size+1):
-            for delta_col in range(-self.window_size,self.window_size+1):
-                if i+delta_row>=0 and i+delta_row<num_rows and j+delta_col>=0 and j+delta_col<num_cols:
-                    features[index] = board[i+delta_row][j+delta_col]
-                else:
-                    features[index] = self.off_board_value
-                index += 1
-        return features
-
     def _make_neighbor_features_board(self,board):
         '''
         Create features of neighborhood around all cells in board. Returns numpy 2d array of features in row-major
