@@ -7,7 +7,6 @@ from pybrain.tools.shortcuts import buildNetwork
 from pybrain.datasets import SupervisedDataSet
 from pybrain.supervised.trainers import BackpropTrainer
 
-
 class ANNClassifier(Classifier):
     ''' Predict entire board at once using neural network. 
 
@@ -38,7 +37,6 @@ class ANNClassifier(Classifier):
         self.lr_decay = lr_decay
         self.momentum = momentum
         self.weight_decay = weight_decay
-        
     
     def set_network(self,net):
         self.net = net
@@ -49,12 +47,17 @@ class ANNClassifier(Classifier):
         
         for e in examples:
             dataset.appendLinked(e.end_board.board.flatten(),e.start_board.board.flatten())
-            
 
-        trainer = BackpropTrainer(self.net,dataset,learningrate=self.learning_rate,lrdecay=self.lr_decay,momentum=self.momentum,weightdecay=self.weight_decay,verbose=verbose)
+        trainer = BackpropTrainer(
+            self.net,dataset,
+            learningrate=self.learning_rate,
+            lrdecay=self.lr_decay,
+            momentum=self.momentum,
+            weightdecay=self.weight_decay,
+            verbose=verbose
+        )
         trainer.trainUntilConvergence(maxEpochs=max_epochs, verbose=verbose, continueEpochs=2)
 
-            
         # choose threshold to maximize accuracy
         
         # get predictions
@@ -65,7 +68,6 @@ class ANNClassifier(Classifier):
             
         self.values = values
 
-            
         targets = (dataset['target']>0.5).flatten() # make sure getting 1.0s as True and 0.0s as False
         self.targets = targets
         values = values.flatten()
@@ -108,8 +110,6 @@ class ANNClassifier(Classifier):
             print('Tuned threshold to '+str(best_threshold)+' with error rate of '+str(best_error_rate))
             
         self.threshold = best_threshold
-        
-        
 
     def predict(self,end_board,delta):
         ''' Make predictions on single board. '''
@@ -120,4 +120,3 @@ class ANNClassifier(Classifier):
         predictions[values>self.threshold] = ALIVE
         
         return predictions.reshape(end_board.board.shape)
-        

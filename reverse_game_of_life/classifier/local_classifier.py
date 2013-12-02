@@ -13,7 +13,13 @@ class LocalClassifier(Classifier):
     ''' Predict each cell 1 at a time. '''
 
     def __init__(self,window_size=1,off_board_value=0,clf=RandomForestClassifier()):
-        ''' LocalClassifier constructor. window_size is number of cells (in all 4 directions) to include in the features for predicting the center cell. So window_size=1 uses 3x3 chunks, =2 uses 5x5 chunks, and so on. off_board_value is the value to represent features that are outside the board, defaults to 0 (ie DEAD). Copies of clf will be made and separate classifiers used for each unique delta.'''
+        '''
+        LocalClassifier constructor.
+        window_size is number of cells (in all 4 directions) to include in the features for predicting the center cell.
+        So window_size=1 uses 3x3 chunks, =2 uses 5x5 chunks, and so on. off_board_value is the value to represent
+        features that are outside the board, defaults to 0 (ie DEAD). Copies of clf will be made and separate
+        classifiers used for each unique delta.
+        '''
         self.window_size = window_size
         self.off_board_value = off_board_value
         self.base_classifier = clf
@@ -28,13 +34,16 @@ class LocalClassifier(Classifier):
             else:
                 return np.rot90(board,transform%4)
             
-
     def _num_features(self):
         ''' Number of features used by this instance to classify each cell. '''
         return (2*self.window_size+1)**2
 
     def _make_neighbor_features_cell(self,board,i,j):
-        ''' Create features of neighborhood around the (i,j) position. Returns numpy array of features.  NOTE: If getting neighborhoods for all positions on a board, use the _make_neighbor_features_board method which is much more efficient. '''
+        '''
+        Create features of neighborhood around the (i,j) position. Returns numpy array of features.  NOTE: If getting
+        neighborhoods for all positions on a board, use the _make_neighbor_features_board method which is much more
+        efficient.
+        '''
         features = np.empty((self.window_size*2+1)**2)
         index = 0
         (num_rows,num_cols) = board.shape
@@ -46,10 +55,12 @@ class LocalClassifier(Classifier):
                     features[index] = self.off_board_value
                 index += 1
         return features
-                
 
     def _make_neighbor_features_board(self,board):
-        ''' Create features of neighborhood around all cells in board. Returns numpy 2d array of features in row-major order, first row is for (0,0) cell, next row for (0,1) cell, and so on. '''
+        '''
+        Create features of neighborhood around all cells in board. Returns numpy 2d array of features in row-major
+        order, first row is for (0,0) cell, next row for (0,1) cell, and so on.
+        '''
         # put board in larger 2d array with off board values around the edges so slice notation will grab the neighborhoods
         square_size = (self.window_size*2+1)
         (num_rows,num_cols) = board.shape
@@ -65,7 +76,6 @@ class LocalClassifier(Classifier):
         
         return features
         
-
     def _make_features_cell(self,board,i,j):
         ''' Creates features describing the (i,j) position. Returns numpy array of features.'''        
         # just use neighborhood features
@@ -73,7 +83,10 @@ class LocalClassifier(Classifier):
         return features
 
     def _make_features_board(self,board):
-        ''' Create features describing all cells on board. Returns 2d numpy array of features in row-major order, so first row is for (0,0), second row for (0,1), etc. '''
+        '''
+        Create features describing all cells on board. Returns 2d numpy array of features in row-major order, so
+        first row is for (0,0), second row for (0,1), etc.
+        '''
         # just use neighborhood features for now
         return self._make_neighbor_features_board(board)
 
@@ -91,10 +104,8 @@ class LocalClassifier(Classifier):
         copies_per = 1
         if use_transformations:
             copies_per = 8
-
         
         data_counter = Counter()
-        
         
         for example in examples:
             if example.start_board is None:
@@ -125,7 +136,6 @@ class LocalClassifier(Classifier):
         print('training data created in {0} seconds'.format(time_end-time_start))
         return (x,y,w) 
 
-    
     def make_training_data(self, examples, use_transformations=False):
         ''' Make training data (x,y) from these examples using the setting for this LocalClassifier. '''
         # assume all examples have same size
@@ -199,7 +209,6 @@ class LocalClassifier(Classifier):
                 # fit
                 clf.fit(train_x,train_y)
 
-
             # store
             self.classifiers[delta] = clf
 
@@ -217,8 +226,6 @@ class LocalClassifier(Classifier):
         else:
             return np.dot(clf.predict(x)==y,w)/np.sum(w)
         
-        
-
     def _fit_grid_point(self, x_train,y_train,w_train,x_test,y_test,w_test,base_estimator,parameters):
         '''Fit a classifier for particular parameter settings. Modeled after
         grid_seary.py from sklearn.
@@ -235,10 +242,8 @@ class LocalClassifier(Classifier):
         
         # evaluate
         score = self._score(clf,x_test,y_test,w_test)
-
             
         return score,parameters
-    
 
     def tune_and_train(self, examples, param_grid, use_transformations=False, use_weights=True,tune_perc=0.5,verbosity=0):
         '''Tune parameters and then train using best parameters. 
@@ -276,8 +281,6 @@ class LocalClassifier(Classifier):
                 w_test = None
                 w_train = None
                                         
-
-            
             # fit each parameter setting using ParameterGrid from
             # sklearn.grid_search to cycle through the possibilities
             self.grid_scores[delta] = [self._fit_grid_point(x_train,y_train,w_train,x_test,y_test,w_test,self.base_classifier,parameters) for parameters in ParameterGrid(param_grid)]
@@ -288,10 +291,8 @@ class LocalClassifier(Classifier):
                 
             self.best_scores[delta] = best_scores
             self.best_params[delta] = best_params
-            
 
             # fit on entire data
-            
             clf = clone(self.base_classifier)
             clf.set_params(**best_params)
             
@@ -304,13 +305,11 @@ class LocalClassifier(Classifier):
                 
             # store
             self.classifiers[delta] = clf
-            
         
         time_end = time.time()
         if verbosity>0:
             print('tuning and training completed in {0} seconds'.format(time_end-time_start))
         
-    
     def predict(self,end_board, delta):
         if delta not in self.classifiers:
             raise ValueError('Unable to predict delta='+str(delta)+', no training data for that delta')

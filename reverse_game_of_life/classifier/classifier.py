@@ -10,7 +10,6 @@ class Classifier:
     >>> c.train(train_examples)
     >>> c.test(test_examples)
     '''
-
     
     def __init__(self):
         pass # all dead predictor needs to state
@@ -26,7 +25,10 @@ class Classifier:
         return prediction
 
     def test(self,examples,detailed_output=False):
-        ''' Evaluate performance on test examples. Returns mean error rate. If detailed_output is true also prints performance for each delta.'''
+        '''
+        Evaluate performance on test examples. Returns mean error rate. If detailed_output is true also prints
+        performance for each delta.
+        '''
         time_start = time.time()
         total_error_rate = 0
         delta_counts = dict()
@@ -51,11 +53,4 @@ class Classifier:
                 print('{0}\t{1}\t{2}'.format(delta,delta_counts[delta],delta_error_rates[delta]/delta_counts[delta]))
             print('{0}\t{1}\t{2}'.format('all',len(examples),total_error_rate/len(examples)))
 
-
-
         return total_error_rate/len(examples)
-
-            
-
-
-
