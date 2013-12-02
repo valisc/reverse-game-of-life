@@ -70,18 +70,13 @@ class LocalClassifier(Classifier):
         
         features = np.empty([num_rows*num_cols,square_size**2])
         # populate features
+        
         for row in range(0,num_rows):
             for col in range(0,num_cols):
                 features[row*num_cols + col] = embed[row:(row+square_size),col:(col+square_size)].flatten()
         
         return features
         
-    def _make_features_cell(self,board,i,j):
-        ''' Creates features describing the (i,j) position. Returns numpy array of features.'''        
-        # just use neighborhood features
-        features = self._make_neighbor_features_cell(board,i,j)
-        return features
-
     def _make_features_board(self,board):
         '''
         Create features describing all cells on board. Returns 2d numpy array of features in row-major order, so
@@ -166,18 +161,9 @@ class LocalClassifier(Classifier):
                 local_board = self._transform_board(example.end_board.board,t)
                 start_board = self._transform_board(example.start_board.board,t)
                 
-                # faster, hopefully
                 x[index:(index+num_rows*num_cols)] = self._make_features_board(local_board)
                 y[index:(index+num_rows*num_cols)] = start_board.flatten()
                 index += num_rows*num_cols
-                # slower, don't use
-                #for i in range(num_rows):
-                #    for j in range(num_cols):
-                #        # training features (the window around i,j) for
-                #        # the i,j cell in this example
-                #        x[index] = self._make_features_cell(local_board,i,j)
-                #        y[index] = local_board[i][j]
-                #        index += 1
 
         time_end = time.time()
         print('training data created in {0} seconds'.format(time_end-time_start))
