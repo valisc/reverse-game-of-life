@@ -46,13 +46,11 @@ class LocalClassifier(Classifier):
         # put board in larger 2d array with off board values around the edges so slice notation will grab the neighborhoods
         square_size = (self.window_size*2+1)
         (num_rows,num_cols) = board.shape
-        embed = np.empty([num_rows+self.window_size*2,num_cols+self.window_size*2])
-        embed.fill(self.off_board_value)
-        embed[self.window_size:(num_rows+self.window_size),self.window_size:(num_cols+self.window_size)] = board
+        embed = np.pad(board, self.window_size, 'constant', constant_values=self.off_board_value) 
         
         features = np.empty([num_rows*num_cols,square_size**2])
-        # populate features
         
+        # populate features
         for row in range(0,num_rows):
             for col in range(0,num_cols):
                 features[row*num_cols + col] = embed[row:(row+square_size),col:(col+square_size)].flatten()

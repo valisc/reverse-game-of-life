@@ -17,12 +17,26 @@ class LocalClassifierTestCase(unittest.TestCase):
         # 000
         # 011
         # 011
-        board = np.array([[0,0,0],[0,1,1],[0,1,1]])        
-        self.assert_array_equal(self.classifier._make_neighbor_features_cell(board,0,0),
-                                [-1,-1,-1,-1,0,0,-1,0,1])
-        self.assert_array_equal(self.classifier._make_neighbor_features_cell(board,1,1),
-                                [0,0,0,0,1,1,0,1,1])
-        
+        board = np.array([
+          [0,0,0],
+          [0,1,1],
+          [0,1,1]
+        ])        
+
+        features_board = self.classifier._make_features_board(board)
+
+        self.assert_array_equal(
+            self.classifier._make_features_board(board),
+            [[-1,-1,-1,-1, 0, 0,-1, 0, 1],
+             [-1,-1,-1, 0, 0, 0, 0, 1, 1],
+             [-1,-1,-1, 0, 0,-1, 1, 1,-1],
+             [-1, 0, 0,-1, 0, 1,-1, 0, 1],
+             [ 0, 0, 0, 0, 1, 1, 0, 1, 1],
+             [ 0, 0,-1, 1, 1,-1, 1, 1,-1],
+             [-1, 0, 1,-1, 0, 1,-1,-1,-1],
+             [ 0, 1, 1, 0, 1, 1,-1,-1,-1],
+             [ 1, 1,-1, 1, 1,-1,-1,-1,-1]]
+        )
 
     def test_transform_board(self):
         # 000
