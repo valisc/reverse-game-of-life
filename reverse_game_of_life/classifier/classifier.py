@@ -1,6 +1,8 @@
 import  time
 import numpy as np
 
+from math import sqrt
+
 from ..conway_board import DEAD,ALIVE
 
 class Classifier:
@@ -24,33 +26,51 @@ class Classifier:
         prediction.fill(DEAD)
         return prediction
 
-    def test(self,examples,detailed_output=False):
-        '''
-        Evaluate performance on test examples. Returns mean error rate. If detailed_output is true also prints
-        performance for each delta.
+    def test(self,examples,verbosity=0,detailed_output=False,output_precision=4):
+        '''Evaluate performance on test examples. Returns mean error rate. If
+        detailed output is True or verbosity>1, displays error rate,
+        standard deviation (sd), and 95% confidence interval (assuming
+        per board error rates are normally distributed) for each
+        delta.
+
+        detailed_output - prints per delta stats if True
+        output_precision - number of decimal places to use in detailed output
+        verbosity - 0 prints nothing, 1 prints timing info, >1 more details
         '''
         time_start = time.time()
         total_error_rate = 0
         delta_counts = dict()
         delta_error_rates = dict()
         
-        for example in examples:
-            error_rate = example.evaluate(self.predict(example.end_board,example.delta))
-            total_error_rate += error_rate
-            if example.delta not in delta_counts:
-                delta_counts[example.delta] = 0
-                delta_error_rates[example.delta] = 0                
-            delta_counts[example.delta] += 1
-            delta_error_rates[example.delta] += error_rate
+        error_rates = [e.evaluate(self.predict(e.end_board,e.delta)) for e in examples]
 
         time_end = time.time()            
-        print('testing completed in {0} seconds'.format(time_end-time_start))
-        
-        # print detailed performance
-        if detailed_output:
-            print ('delta\tn\terror rate')
-            for delta in sorted(delta_counts.keys()):
-                print('{0}\t{1}\t{2}'.format(delta,delta_counts[delta],delta_error_rates[delta]/delta_counts[delta]))
-            print('{0}\t{1}\t{2}'.format('all',len(examples),total_error_rate/len(examples)))
+        if verbosity>0:
+            print('testing completed in {0:.1f} seconds'.format(time_end-time_start))
 
-        return total_error_rate/len(examples)
+        if verbosity>1 or detailed_output:            
+            # print detailed performance
+            z_value = 1.96 # for 95% confidence intervals
+            # create format strings
+            header_format = '{0:<7} {1:<7} {2:<12} {3:<'+str(output_precision+4)+'} {4}'
+            data_format = '{0:<7} {1:<7d} {2:<12.'+str(output_precision)+'f} {3:<'+str(output_precision+4)+'.'+str(output_precision)+'f} ({4:.'+str(output_precision)+'f},{5:.'+str(output_precision)+'f})'
+            
+            print(header_format.format('delta','n','error rate','sd','95% CI'))
+            for delta in sorted(set([e.delta for e in examples])):
+                cur_error_rates = [error_rate for error_rate,example in zip(error_rates,examples) if example.delta==delta]
+               
+
+                mean = sum(cur_error_rates)/len(cur_error_rates)
+                variance = sum([x*x for x in cur_error_rates])/len(cur_error_rates) - mean**2
+                standard_error_mean = sqrt(variance/len(cur_error_rates))
+                
+                print(data_format.format(delta,len(cur_error_rates),mean,sqrt(variance), mean-z_value*standard_error_mean,mean+z_value*standard_error_mean ))
+                
+            # overall
+            all_mean = sum(error_rates)/len(error_rates)
+            all_variance = sum([x*x for x in error_rates])/len(error_rates) - all_mean**2
+            all_standard_error_mean = sqrt(all_variance/len(error_rates))
+            print(data_format.format('all',len(error_rates),all_mean,sqrt(all_variance), all_mean-z_value*all_standard_error_mean,all_mean+z_value*all_standard_error_mean))
+            
+
+        return sum(error_rates)/len(error_rates)
