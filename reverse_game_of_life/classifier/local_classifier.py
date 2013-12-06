@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.lib.stride_tricks import as_strided
 import  time
 
 
@@ -45,17 +46,21 @@ class LocalClassifier(Classifier):
         '''
         # put board in larger 2d array with off board values around the edges so slice notation will grab the neighborhoods
         square_size = (self.window_size*2+1)
-        (num_rows,num_cols) = board.shape
         embed = np.pad(board, self.window_size, 'constant', constant_values=self.off_board_value) 
         
-        features = np.empty([num_rows*num_cols,square_size**2])
+        size = square_size
+        step = 1
         
+        num_rows,num_cols = embed.shape
+        row_stride, column_stride = embed.strides
         # populate features
-        for row in range(0,num_rows):
-            for col in range(0,num_cols):
-                features[row*num_cols + col] = embed[row:(row+square_size),col:(col+square_size)].flatten()
+        features = as_strided(
+            embed,
+            (int((num_rows - size + 1) / step), int((num_cols - size + 1) / step), size, size),
+            (row_stride * step, column_stride * step, row_stride, column_stride)
+        )
         
-        return features
+        return features.reshape(int(features.size/(size*size)), size*size)
         
     def _make_features_board(self,board):
         '''
