@@ -4,6 +4,7 @@ import numpy as np
 from math import sqrt
 
 from ..conway_board import DEAD,ALIVE
+from ..tools import bootstrap_confidence_interval
 
 class Classifier:
     ''' Default all-dead classifier and super-class for other reverse game of life solutions. 
@@ -26,16 +27,22 @@ class Classifier:
         prediction.fill(DEAD)
         return prediction
 
-    def test(self,examples,verbosity=0,detailed_output=False,output_precision=4):
+    def test(self,examples,verbosity=0,detailed_output=False,output_precision=4,conf_int_method='normal'):
         '''Evaluate performance on test examples. Returns mean error rate. If
         detailed output is True or verbosity>1, displays error rate,
-        standard deviation (sd), and 95% confidence interval (assuming
-        per board error rates are normally distributed) for each
+        standard deviation (sd), and 95% confidence interval  for each
         delta.
 
         detailed_output - prints per delta stats if True
-        output_precision - number of decimal places to use in detailed output
-        verbosity - 0 prints nothing, 1 prints timing info, >1 more details
+        output_precision - number of decimal places to use in detailed
+        output verbosity - 0 prints nothing (default),
+                           1 prints timing info,
+                           >1 more details 
+        conf_int_method - 'bootstrap' for empirical bootstrap CI
+                          'normal' to assume normally distributed error rates 
+                          (not actually true) but much faster than bootstrap 
+                          and appears to provide similar intervals (default)
+
         '''
         time_start = time.time()
         total_error_rate = 0
@@ -63,14 +70,29 @@ class Classifier:
                 mean = sum(cur_error_rates)/len(cur_error_rates)
                 variance = sum([x*x for x in cur_error_rates])/len(cur_error_rates) - mean**2
                 standard_error_mean = sqrt(variance/len(cur_error_rates))
+                if conf_int_method=='normal':
+                    lb = mean-z_value*standard_error_mean
+                    ub = mean+z_value*standard_error_mean
+                elif conf_int_method=='bootstrap':
+                    lb,ub = bootstrap_confidence_interval(cur_error_rates)
+                else:
+                    raise ValueError('Unknown conf_int_method='+str(conf_int_method))
                 
-                print(data_format.format(delta,len(cur_error_rates),mean,sqrt(variance), mean-z_value*standard_error_mean,mean+z_value*standard_error_mean ))
+                print(data_format.format(delta,len(cur_error_rates),mean,sqrt(variance),lb,ub))
                 
             # overall
             all_mean = sum(error_rates)/len(error_rates)
             all_variance = sum([x*x for x in error_rates])/len(error_rates) - all_mean**2
             all_standard_error_mean = sqrt(all_variance/len(error_rates))
-            print(data_format.format('all',len(error_rates),all_mean,sqrt(all_variance), all_mean-z_value*all_standard_error_mean,all_mean+z_value*all_standard_error_mean))
+            if conf_int_method=='normal':
+                lb = all_mean-z_value*all_standard_error_mean
+                ub = all_mean+z_value*all_standard_error_mean
+            elif conf_int_method=='bootstrap':
+                lb,ub = bootstrap_confidence_interval(error_rates)
+            else:
+                raise ValueError('Unknown conf_int_method='+str(conf_int_method))
+                
+            print(data_format.format('all',len(error_rates),all_mean,sqrt(all_variance),lb,ub))
             
 
         return sum(error_rates)/len(error_rates)
