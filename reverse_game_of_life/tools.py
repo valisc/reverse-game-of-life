@@ -3,6 +3,8 @@
 from random import choice
 import numpy as np
 
+from .conway_board import DEAD,ALIVE
+
 def bootstrap_confidence_interval(a,f=lambda x:x.mean(),num_replicates=1000,alpha=0.05):
     ''' Empirical confidence interval for a statistic using the bootstrap.
     
@@ -24,3 +26,36 @@ def bootstrap_confidence_interval(a,f=lambda x:x.mean(),num_replicates=1000,alph
     np.ndarray.sort(d)
     # return the alpha/2 and 1-alpha/2 quantiles for the confidence interval
     return d[int(num_replicates*alpha/2)],d[int(num_replicates*(1-alpha/2))]
+
+
+def board_to_int(board):
+    '''Convert a board of ALIVE and DEAD to an (arbitrary sized) int for
+    efficient lookup and storage. Can be reversed with int_to_board
+    with the original shape.
+
+    '''
+
+    base = 1
+    value = 0
+    # order='C' to ensure consistent order through arrays of same size
+    for c in np.nditer(board,order='C'):
+        if c==ALIVE:
+            value += base
+        base *= 2
+    return value
+
+def int_to_board(value,num_rows,num_cols):
+    '''Convert an int (arbitrary sized) representation to the original
+    ALIVE and DEAD board. Can be reversed with board_to_int.
+
+    '''
+    a = np.empty(num_rows*num_cols)
+    a[...] = DEAD
+    temp_value = value
+    for i in range(num_rows*num_cols):
+        if temp_value%2 == 1:
+            a[i] = ALIVE
+        temp_value //= 2
+    return a.reshape(num_rows,num_cols,order='C')
+    
+    
