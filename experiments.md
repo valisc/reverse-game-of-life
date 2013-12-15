@@ -4,45 +4,45 @@ Random forests and window size of 3
 
 With some param tuning for max_depth and max_features
 | All     | Training set size                 |
-| # trees | 1k     | 2k     | 5k     | 10k    |
+| # trees | 1k     | 2k     | 5k     | 10k    | 20k 
 | 0 (dead)| 0.1439 |
-| 10      | 0.1268 | 0.1254 | 0.1240 | 0.1225 |
+| 10      | 0.1268 | 0.1254 | 0.1240 | 0.1225 | 0.1212 |
 | 20      | 0.1255 | 0.1246 | 0.1221 | 0.1210 |
 | 50      | 0.1240 | 0.1225 | 0.1206 | 
 
 
 | delta=1 | Training set size                 |
-| # trees | 1k     | 2k     | 5k     | 10k    |
+| # trees | 1k     | 2k     | 5k     | 10k    | 20k    |
 | 0(dead) | 0.1443 |
-| 10      | 0.0968 | 0.0939 | 0.0910 | 0.0885 | 
-| 20      | 0.0942 | 0.0923 | 0.0878 | 0.0860 | 
+| 10      | 0.0968 | 0.0939 | 0.0910 | 0.0885 | 0.0858 |
+| 20      | 0.0942 | 0.0923 | 0.0878 | 0.0860 |
 | 50      | 0.0912 | 0.0886 | 0.0858 |  
 
 | delta=2
-| # trees | 1k     | 2k     | 5k     | 10k    |
+| # trees | 1k     | 2k     | 5k     | 10k    | 20k    |
 | 0(dead) | 0.1429 |
-| 10      | 0.1247 | 0.1230 | 0.1210 | 0.1190 |
+| 10      | 0.1247 | 0.1230 | 0.1210 | 0.1190 | 0.1180 |
 | 20      | 0.1232 | 0.1219 | 0.1190 | 0.1179 |
 | 50      | 0.1213 | 0.1194 | 0.1173 |
 
 | delta=3
-| # trees | 1k     | 2k     | 5k     | 10k    |
+| # trees | 1k     | 2k     | 5k     | 10k    | 20k    |
 | 0(dead) | 0.1449 |
-| 10      | 0.1360 | 0.1350 | 0.1343 | 0.1323 |
+| 10      | 0.1360 | 0.1350 | 0.1343 | 0.1323 | 0.1313 |
 | 20      | 0.1353 | 0.1343 | 0.1320 | 0.1312 |
 | 50      | 0.1334 | 0.1325 | 0.1307 |
 
 | delta=4 
-| # trees | 1k     | 2k     | 5k     | 10k    |
+| # trees | 1k     | 2k     | 5k     | 10k    | 20k    |
 | 0(dead) | 0.1439 |
-| 10      | 0.1383 | 0.1372 | 0.1359 | 0.1355 |
+| 10      | 0.1383 | 0.1372 | 0.1359 | 0.1355 | 0.1344 |
 | 20      | 0.1370 | 0.1365 | 0.1351 | 0.1341 |
 | 50      | 0.1367 | 0.1352 | 0.1339 |
  
 | delta=5
-| # trees | 1k     | 2k     | 5k     | 10k    |
+| # trees | 1k     | 2k     | 5k     | 10k    | 20k    |
 | 0(dead) | 0.1436 |
-| 10      | 0.1385 | 0.1382 | 0.1379 | 0.1376 |
+| 10      | 0.1385 | 0.1382 | 0.1379 | 0.1376 | 0.1366 |
 | 20      | 0.1380 | 0.1381 | 0.1369 | 0.1362 |
 | 50      | 0.1377 | 0.1369 | 0.1357 |
 
@@ -410,3 +410,33 @@ delta   n       error rate   sd       95% CI
 5       9925    0.1357       0.0999   (0.1338,0.1377)
 all     50000   0.1206       0.0948   (0.1198,0.1215)
 0.12063600000000377
+
+
+
+>>> rf_params = {'max_depth':[12,16,20],'max_features':[8,12,16,20,24,28,32,36]}>>> lc_rf10_w3_20k = LocalClassifier(window_size=3,off_board_value=-1,clf=RandomForestClassifier(n_estimators=10))
+>>> lc_rf10_w3_20k.tune_and_train(examples[0:20000],rf_params,use_transformations=True)
+training data created in 102.13056993484497 seconds
+training data created in 100.57641696929932 seconds
+training data created in 203.28278613090515 seconds
+training data created in 95.4451813697815 seconds
+training data created in 95.11247038841248 seconds
+training data created in 193.48292016983032 seconds
+training data created in 93.84220147132874 seconds
+training data created in 94.36005306243896 seconds
+training data created in 284.34112191200256 seconds
+training data created in 96.8078966140747 seconds
+training data created in 98.22176742553711 seconds
+training data created in 189.39057302474976 seconds
+training data created in 95.31740832328796 seconds
+training data created in 95.8582022190094 seconds
+training data created in 193.12487864494324 seconds
+>>> lc_rf10_w3_20k.test(examples[50000:100000],detailed_output=True,verbosity=2)
+testing completed in 125.1 seconds
+delta   n       error rate   sd       95% CI
+1       10054   0.0858       0.0715   (0.0844,0.0872)
+2       9944    0.1180       0.0927   (0.1162,0.1199)
+3       10116   0.1313       0.0974   (0.1294,0.1332)
+4       9961    0.1344       0.0983   (0.1325,0.1364)
+5       9925    0.1366       0.0987   (0.1347,0.1386)
+all     50000   0.1212       0.0942   (0.1204,0.1220)
+0.12118495000000197
