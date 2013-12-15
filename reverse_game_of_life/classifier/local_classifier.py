@@ -4,9 +4,12 @@ import  time
 
 
 from collections import Counter
+from ..conway_board import DEAD,ALIVE
 from .classifier import Classifier
+from ..kaggle_example import create_examples
 from sklearn import clone
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.grid_search import ParameterGrid
 from random import shuffle
 
@@ -258,7 +261,7 @@ class LocalClassifier(Classifier):
 
             (best_scores,best_params) = sorted(self.grid_scores[delta],key=lambda x:x[0], reverse=True)[0]
             if verbosity>1:
-                print('best params for delta={0} are {1} with score of {2}',format(delta,str(best_params),str(best_scores)))
+                print('best params for delta={0} are {1} with score of {2}'.format(delta,str(best_params),str(best_scores)))
                 
             self.best_scores[delta] = best_scores
             self.best_params[delta] = best_params
@@ -299,3 +302,70 @@ class LocalClassifier(Classifier):
         # reshape into board
         predictions = y_hat.reshape((num_rows,num_cols))
         return predictions
+
+
+
+class FreshEnsembleClassifier(LocalClassifier):
+    ''' Generate new examples for every tree in the forest. '''
+    
+    def __init__(self,window_size=1,off_board_value=0,clf=DecisionTreeClassifier(),n_estimators=10):
+        # superclass constructor
+        LocalClassifier.__init__(self,window_size=window_size,off_board_value=off_board_value,clf=clf)
+        self.n_estimators=n_estimators
+        
+        
+    def train(self,num_examples,deltas=list(range(1,6)),use_transformations=False,use_weights=True,verbosity=0):
+        '''Train ensemble of classifiers using newly generated data for every
+        member of the ensemble.
+
+        '''
+        time_start = time.time()
+        
+        self.classifiers = dict()
+
+        for delta in deltas:
+            self.classifiers[delta] = [] # list for ensemble of classifiers
+            for i in range(self.n_estimators):
+                # base classifier
+                clf = clone(self.base_classifier)
+                
+                if use_weights:
+                    train_x,train_y,train_w = self.make_weighted_training_data(create_examples(num_examples=num_examples,deltas=[delta]),use_transformations=use_transformations)
+                    if verbosity>1:
+                        print ('delta={0}, #{1}: training with {2} weighted examples'.format(delta,i,len(train_x)))
+                    # fit
+                    clf.fit(train_x,train_y,sample_weight=train_w)
+                else:
+                    train_x,train_y = self.make_training_data(create_examples(num_examples=num_examples,deltas=[delta]),use_transformations=use_transformations)
+                    if verbosity>1:
+                        print ('delta={0}, #{1}: training with {2} examples'.format(delta,i,len(train_x)))
+                    clf.fit(train_x,train_y)
+                    
+                self.classifiers[delta].append(clf)
+        
+        time_end = time.time()
+        if verbosity>0:
+            print('training completed in {0:.1f} seconds'.format(time_end-time_start))
+
+            
+
+    def predict(self,end_board,delta):
+        if delta not in self.classifiers:
+            raise ValueError('Unable to predict delta='+str(delta)+', no classifiers for that delta')
+
+        
+        # make all predictions at once (row-major order)
+        x = self._make_features_board(end_board.board)
+        
+        predictions = np.zeros([len(x),2])
+        
+        for clf in self.classifiers[delta]:
+            predictions += clf.predict_proba(x)
+            
+        ret = np.empty(len(predictions))
+        ret[...] = DEAD # default to all dead        
+        ret[predictions[:,0]<predictions[:,1]] = ALIVE # grab alive predictions
+        
+        return ret.reshape(end_board.board.shape)
+
+                

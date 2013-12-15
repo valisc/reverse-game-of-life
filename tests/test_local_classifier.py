@@ -120,3 +120,24 @@ class LocalClassifierTestCase(unittest.TestCase):
 
         self.assertTrue(1 in self.classifier.classifiers)
         
+
+class FreshEnsembleClassifierTestCase(unittest.TestCase):
+    ''' Test FreshEnsembleClassifier. '''
+
+    def setUp(self):
+        self.classifier = FreshEnsembleClassifier(window_size=1,off_board_value=-1,n_estimators=3)
+
+        
+    def test_predict(self):
+        examples = create_examples(num_examples=1,deltas=[1])
+
+        self.assertRaises(ValueError,self.classifier.predict,examples[0].start_board,examples[0].delta)
+
+        self.classifier.train(num_examples=100,deltas=[1])
+
+        result = self.classifier.predict(examples[0].end_board,examples[0].delta)
+        # right size
+        self.assertEqual(result.shape,(20,20))
+        # all 0s or 1s
+        self.assertTrue(((result==1) | (result==0)).all())
+
