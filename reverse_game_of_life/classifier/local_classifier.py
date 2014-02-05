@@ -7,6 +7,7 @@ from collections import Counter
 from ..conway_board import DEAD,ALIVE
 from .classifier import Classifier
 from ..kaggle_example import create_examples
+from ..tools import transform_board,inverse_transform
 from sklearn import clone
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
@@ -28,16 +29,7 @@ class LocalClassifier(Classifier):
         self.off_board_value = off_board_value
         self.base_classifier = clf
         self.classifiers = dict()
-        
-    def _transform_board(self,board,transform=0):
-        if transform==0:
-            return board
-        else:
-            if transform>=4:
-                return np.rot90(np.fliplr(board),transform%4)
-            else:
-                return np.rot90(board,transform%4)
-            
+
     def _num_features(self):
         ''' Number of features used by this instance to classify each cell. '''
         return (2*self.window_size+1)**2
@@ -97,8 +89,8 @@ class LocalClassifier(Classifier):
                 raise ValueError('all examples must have non-None end_board')
             for t in range(copies_per):
                 # do transform here to make sure features and labels line up
-                local_board = self._transform_board(example.end_board.board,t)
-                start_board = self._transform_board(example.start_board.board,t)
+                local_board = transform_board(example.end_board.board,t)
+                start_board = transform_board(example.start_board.board,t)
                 
                 local_x = self._make_features_board(local_board)
                 local_y = start_board.flatten()
@@ -146,8 +138,8 @@ class LocalClassifier(Classifier):
                 raise ValueError('all examples must have non-None end_board')
             for t in range(copies_per):
                 # do transform here to make sure features and labels line up
-                local_board = self._transform_board(example.end_board.board,t)
-                start_board = self._transform_board(example.start_board.board,t)
+                local_board = transform_board(example.end_board.board,t)
+                start_board = transform_board(example.start_board.board,t)
                 
                 x[index:(index+num_rows*num_cols)] = self._make_features_board(local_board)
                 y[index:(index+num_rows*num_cols)] = start_board.flatten()

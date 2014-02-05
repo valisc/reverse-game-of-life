@@ -58,4 +58,30 @@ def int_to_board(value,num_rows,num_cols):
         temp_value //= 2
     return a.reshape(num_rows,num_cols,order='C')
     
+
+def transform_board(board,transform=0):
+    '''
+    Transforms board to one of the 8 possible rotations/flips.
+    '''
     
+    if transform<0 or transform>8:
+        raise ValueError('transform_board only accepts transformations between 0 and 7 (inclusive)')
+    
+    if transform==0:
+        return board
+    else:
+        if transform>=4:
+            return np.rot90(np.fliplr(board),transform%4)
+        else:
+            return np.rot90(board,transform%4)
+
+
+_inverse_transform = [0,3,2,1,4,5,6,7]
+def inverse_transform(transform):
+    '''
+    Returns transform t' such that transform_board(transform_board(b,t),t')==b.
+    '''
+    if transform<0 or transform>8:
+        raise ValueError('inverse_transform only accepts ints between 0 and 7 (inclusive)')
+    
+    return _inverse_transform[transform]

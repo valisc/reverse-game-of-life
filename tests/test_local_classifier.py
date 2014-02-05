@@ -38,25 +38,6 @@ class LocalClassifierTestCase(unittest.TestCase):
              [ 1, 1,-1, 1, 1,-1,-1,-1,-1]]
         )
 
-    def test_transform_board(self):
-        # 000
-        # 011
-        # 100
-        board = np.array([[0,0,0],[0,1,1],[1,0,0]])
-        
-        # order of transforms is not important, just that we get all 8
-        all_transforms = [
-            [0,0,0,0,1,1,1,0,0], # original
-            [1,0,0,0,1,0,0,1,0], # clockwise 90
-            [0,0,1,1,1,0,0,0,0], # clockwise 180
-            [0,1,0,0,1,0,0,0,1], # clockwise 270
-            [0,0,0,1,1,0,0,0,1], # flip vertical
-            [0,1,0,0,1,0,1,0,0], # flip and 90
-            [1,0,0,0,1,1,0,0,0], # flip and 180
-            [0,0,1,0,1,0,0,1,0]] # flip and 270
-
-        received = [list(self.classifier._transform_board(board,i).flatten()) for i in range(8)]
-        self.assertEqual(sorted(received),sorted(all_transforms))
 
     def test_make_training_data(self):
         # 10

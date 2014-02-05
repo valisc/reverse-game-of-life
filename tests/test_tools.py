@@ -51,4 +51,48 @@ class ToolsTestCase(unittest.TestCase):
         a[2,3] = 1
         self.assertTrue(np.array_equal(int_to_board(board_to_int(a),20,20),a))
 
+    
+    def test_transform_board(self):
+        # 000
+        # 011
+        # 100
+        board = np.array([[0,0,0],[0,1,1],[1,0,0]])
         
+        # order of transforms is not important, just that we get all 8
+        all_transforms = [
+            [0,0,0,0,1,1,1,0,0], # original
+            [1,0,0,0,1,0,0,1,0], # clockwise 90
+            [0,0,1,1,1,0,0,0,0], # clockwise 180
+            [0,1,0,0,1,0,0,0,1], # clockwise 270
+            [0,0,0,1,1,0,0,0,1], # flip vertical
+            [0,1,0,0,1,0,1,0,0], # flip and 90
+            [1,0,0,0,1,1,0,0,0], # flip and 180
+            [0,0,1,0,1,0,0,1,0]] # flip and 270
+        
+        received = [list(transform_board(board,i).flatten()) for i in range(8)]
+        self.assertEqual(sorted(received),sorted(all_transforms))
+
+
+    def test_inverse_transform(self):
+        # 000
+        # 011
+        # 100
+        board = np.array([[0,0,0],[0,1,1],[1,0,0]])
+
+        # applying transform and its inverse should bring back to original board
+        for t in range(8):
+            self.assertTrue(np.array_equal(transform_board(transform_board(board,t),inverse_transform(t)),board), repr(t) + ' and inverse do not combine to identity')
+            
+    def test_inverse_transform2(self):
+        # 0100
+        # 1010
+        # 1101
+        # 1111
+        board = np.array([[0,1,0,0],
+                          [1,0,1,0],
+                          [1,1,0,1],
+                          [1,1,1,1]])
+
+        # applying transform and its inverse should bring back to original board
+        for t in range(8):
+            self.assertTrue(np.array_equal(transform_board(transform_board(board,t),inverse_transform(t)),board), repr(t) + ' and inverse do not combine to identity')
