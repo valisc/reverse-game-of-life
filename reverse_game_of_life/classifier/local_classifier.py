@@ -17,19 +17,22 @@ from random import shuffle
 class LocalClassifier(Classifier):
     ''' Predict each cell 1 at a time. '''
 
-    def __init__(self,window_size=1,off_board_value=0,clf=RandomForestClassifier()):
+    def __init__(self,window_size=1,off_board_value=0,clf=RandomForestClassifier(), test_use_transforms = False, test_threshold = 0.5):
         '''
         LocalClassifier constructor.
         window_size is number of cells (in all 4 directions) to include in the features for predicting the center cell.
         So window_size=1 uses 3x3 chunks, =2 uses 5x5 chunks, and so on. off_board_value is the value to represent
         features that are outside the board, defaults to 0 (ie DEAD). Copies of clf will be made and separate
         classifiers used for each unique delta.
+        test_use_transforms - if true, uses all 8 board transforms and averages results to predict, uses test_treshold as proba threshold for ALIVE predictions
         '''
         self.window_size = window_size
         self.off_board_value = off_board_value
         self.base_classifier = clf
         self.classifiers = dict()
-
+        self.test_use_transforms = test_use_transforms
+        self.test_threshold = test_threshold
+        
     def _num_features(self):
         ''' Number of features used by this instance to classify each cell. '''
         return (2*self.window_size+1)**2
@@ -279,21 +282,55 @@ class LocalClassifier(Classifier):
     def predict(self,end_board, delta):
         if delta not in self.classifiers:
             raise ValueError('Unable to predict delta='+str(delta)+', no training data for that delta')
-        
+
+        try:
+            self.test_use_transforms
+        except AttributeError:
+            # old version without test_use_Transforms and test_threshold, so add them
+            self.test_use_transforms = False
+            self.test_threshold = 0.5
+            
         clf = self.classifiers[delta]
 
         (num_rows,num_cols) = end_board.board.shape
+
+        if self.test_use_transforms:
+            # predict on all 8 transforms of board and average the probabilities
+            y_hat = np.zeros((num_rows,num_cols))
+
+            for t in range(8):
+                #temp_array = np.array(transform_board(end_board.board,t))
+                x = self._make_features_board(transform_board(end_board.board,t))
+                #print('x.shape='+str(x.shape))
+                y_cur = clf.predict_proba(x)[:,1]
+                #y_cur = y_cur[:,1] # grab second column, probs for the positive (1) class
+                #print('y_cur.shape=',str(y_cur.shape))
+                y_cur = y_cur.reshape((num_rows,num_cols))
+                #print('y_cur.shape=',str(y_cur.shape))
+                # add to predictions, but transform back to original board
+                y_add = transform_board(y_cur,inverse_transform(t))
+                #print('y_add.shape=',str(y_add.shape))
+                y_hat = y_hat+0.125*y_add
+                
+
+            predictions = np.empty((num_rows,num_cols),dtype=int)
+            predictions[...] = DEAD
+            predictions[y_hat>self.test_threshold] = ALIVE
+
+            return predictions
         
-        # make all cell predictions at once (row-major order)
-        x = np.empty([num_rows*num_cols,self._num_features()])
-        # populate x
-        x = self._make_features_board(end_board.board)
-        
-        # predict
-        y_hat = clf.predict(x)
-        # reshape into board
-        predictions = y_hat.reshape((num_rows,num_cols))
-        return predictions
+        else:
+            # make all cell predictions at once (row-major order)
+            x = np.empty([num_rows*num_cols,self._num_features()])
+            # populate x
+            x = self._make_features_board(end_board.board)
+            
+            # predict
+            y_hat = clf.predict(x)
+            
+            # reshape into board
+            predictions = y_hat.reshape((num_rows,num_cols))
+            return predictions
 
 
 
