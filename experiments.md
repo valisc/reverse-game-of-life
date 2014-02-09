@@ -5,15 +5,15 @@ Random forests and window size of 3
 v1 - param tuning for max_depth and max_features
 v2 - max_depth=None and min_samples_split=64 and param tuning for max_features
 
-| All     | Training set size                 |
-| # trees | 1k     | 2k     | 5k     | 10k    | 20k 
+| All     | Training set size                                   |
+| # trees | 1k     | 2k     | 5k     | 10k    | 20k    | 50k    |
 | 0 (dead)| 0.1439 |
 | 10      | 0.1268 | 0.1254 | 0.1240 | 0.1225 | 0.1212 |
 | 20      | 0.1255 | 0.1246 | 0.1221 | 0.1210 |
 | 50      | 0.1240 | 0.1225 | 0.1206 | 
 | 10 v2   | 0.1234 | 0.1220 | 0.1202 | 0.1190 |
-| 20 v2   | 0.1226 | 0.1213 | 0.1195 | 0.1184 |
-
+| 20 v2   | 0.1226 | 0.1213 | 0.1195 | 0.1184 | 0.1173 | 0.1160 |
+| 50 v2   | 0.1225 | 0.1209 | 0.1191 | 0.1180 | 
 
 | delta=1 | Training set sizen                 |
 | # trees | 1k     | 2k     | 5k     | 10k    | 20k    |
@@ -22,7 +22,8 @@ v2 - max_depth=None and min_samples_split=64 and param tuning for max_features
 | 20      | 0.0942 | 0.0923 | 0.0878 | 0.0860 |
 | 50      | 0.0912 | 0.0886 | 0.0858 |  
 | 10 v2   | 0.0925 | 0.0895 | 0.0862 | 0.0844 |
-| 20 v2   | 0.0911 | 0.0883 | 0.0848 | 0.0830 |
+| 20 v2   | 0.0911 | 0.0883 | 0.0848 | 0.0830 | 0.0810 | 0.0787 |
+| 50 v2   | 0.0907 | 0.0876 | 0.0843 | 0.0825 | 
 
 | delta=2
 | # trees | 1k     | 2k     | 5k     | 10k    | 20k    |
@@ -31,7 +32,8 @@ v2 - max_depth=None and min_samples_split=64 and param tuning for max_features
 | 20      | 0.1232 | 0.1219 | 0.1190 | 0.1179 |
 | 50      | 0.1213 | 0.1194 | 0.1173 |
 | 10 v2   | 0.1208 | 0.1190 | 0.1172 | 0.1152 |
-| 20 v2   | 0.1201 | 0.1180 | 0.1161 | 0.1148 |
+| 20 v2   | 0.1201 | 0.1180 | 0.1161 | 0.1148 | 0.1131 | 0.1116 |
+| 50 v2   | 0.1192 | 0.1175 | 0.1155 | 0.1140 | 
 
 | delta=3
 | # trees | 1k     | 2k     | 5k     | 10k    | 20k    |
@@ -40,7 +42,8 @@ v2 - max_depth=None and min_samples_split=64 and param tuning for max_features
 | 20      | 0.1353 | 0.1343 | 0.1320 | 0.1312 |
 | 50      | 0.1334 | 0.1325 | 0.1307 |
 | 10 v2   | 0.1323 | 0.1317 | 0.1300 | 0.1290 |
-| 20 v2   | 0.1317 | 0.1309 | 0.1293 | 0.1284 |
+| 20 v2   | 0.1317 | 0.1309 | 0.1293 | 0.1284 | 0.1275 | 0.1264 |
+| 50 v2   | 0.1322 | 0.1305 | 0.1291 | 0.1280 | 
 
 | delta=4 
 | # trees | 1k     | 2k     | 5k     | 10k    | 20k    |
@@ -49,8 +52,9 @@ v2 - max_depth=None and min_samples_split=64 and param tuning for max_features
 | 20      | 0.1370 | 0.1365 | 0.1351 | 0.1341 |
 | 50      | 0.1367 | 0.1352 | 0.1339 |
 | 10 v2   | 0.1356 | 0.1348 | 0.1331 | 0.1326 |
-| 20 v2   | 0.1350 | 0.1345 | 0.1328 | 0.1321 |
- 
+| 20 v2   | 0.1350 | 0.1345 | 0.1328 | 0.1321 | 0.1316 | 0.1307 |
+| 50 v2   | 0.1351 | 0.1341 | 0.1325 | 0.1320 | 
+
 | delta=5
 | # trees | 1k     | 2k     | 5k     | 10k    | 20k    |
 | 0(dead) | 0.1436 |
@@ -58,7 +62,8 @@ v2 - max_depth=None and min_samples_split=64 and param tuning for max_features
 | 20      | 0.1380 | 0.1381 | 0.1369 | 0.1362 |
 | 50      | 0.1377 | 0.1369 | 0.1357 |
 | 10 v2   | 0.1359 | 0.1353 | 0.1348 | 0.1342 |
-| 20 v2   | 0.1355 | 0.1351 | 0.1345 | 0.1339 |
+| 20 v2   | 0.1355 | 0.1351 | 0.1345 | 0.1339 | 0.1335 | 0.1330 |
+| 50 v2   | 0.1354 | 0.1350 | 0.1343 | 0.1337 | 
 
 
 # necessary imports
@@ -731,3 +736,197 @@ all     50000   0.1184       0.0942   (0.1176,0.1192)
 >>> pickle.dump(lc_rf20_w3_v2_10k,gzip.open('lc_rf20_w3_v2_10k.p.gz','wb'))
 >>> [(c,lc_rf20_w3_v2_10k.classifiers[c].max_features) for c in lc_rf20_w3_v2_10k.classifiers]
 [(1, 28), (2, 12), (3, 16), (4, 16), (5, 12)]
+
+
+
+>>> rf_v2_params =  {'max_features':[4,8,12,16,20,24,28,32,36,40]}
+>>> lc_rf20_w3_v2_20k = LocalClassifier(window_size=3,off_board_value=-1,clf=RandomForestClassifier(n_estimators=20,max_depth=None,bootstrap=False,min_samples_split=64))
+>>> lc_rf20_w3_v2_20k.tune_and_train(examples[0:20000],rf_v2_params,use_transformations=True,verbosity=1)
+training data created in 104.69975423812866 seconds
+training data created in 101.86700820922852 seconds
+training data created in 206.79511094093323 seconds
+training data created in 99.5311450958252 seconds
+training data created in 98.85636115074158 seconds
+training data created in 200.7240424156189 seconds
+training data created in 98.36560034751892 seconds
+training data created in 98.68367314338684 seconds
+training data created in 199.1192808151245 seconds
+training data created in 97.37931489944458 seconds
+training data created in 97.41051483154297 seconds
+training data created in 198.1104371547699 seconds
+training data created in 99.23622941970825 seconds
+training data created in 105.36774921417236 seconds
+training data created in 222.0353262424469 seconds
+tuning and training completed in 225401.1692199707 seconds
+>>> lc_rf20_w3_v2_20k.test(examples[50000:100000],detailed_output=True,verbosity=2)
+testing completed in 357.6 seconds
+delta   n       error rate   sd       95% CI
+1       10054   0.0810       0.0682   (0.0797,0.0823)
+2       9944    0.1131       0.0913   (0.1113,0.1149)
+3       10116   0.1275       0.0975   (0.1256,0.1294)
+4       9961    0.1316       0.0991   (0.1297,0.1336)
+5       9925    0.1335       0.1004   (0.1315,0.1355)
+all     50000   0.1173       0.0941   (0.1165,0.1181)
+0.11729325000000275
+>>> [(c,lc_rf20_w3_v2_20k.classifiers[c].max_features) for c in lc_rf20_w3_v2_20k.classifiers]
+[(1, 24), (2, 24), (3, 16), (4, 16), (5, 20)]
+
+
+
+>>> rf_v2_params = {'max_features': [4,8,12,16,20,24,28,32,36,40]}
+>>> lc_rf50_w3_v2_1k = LocalClassifier(window_size=3,off_board_value=-1,clf=RandomForestClassifier(n_estimators=50,max_depth=None,bootstrap=False,min_samples_split=64))
+>>> lc_rf50_w3_v2_1k.tune_and_train(examples[0:1000],rf_v2_params,use_transformations=True,verbosity=1)
+training data created in 5.512122631072998 seconds
+training data created in 5.590906143188477 seconds
+training data created in 11.17884349822998 seconds
+training data created in 4.901135683059692 seconds
+training data created in 5.042982339859009 seconds
+training data created in 9.918485164642334 seconds
+training data created in 5.105377674102783 seconds
+training data created in 5.1555702686309814 seconds
+training data created in 10.051684379577637 seconds
+training data created in 4.288602828979492 seconds
+training data created in 4.687084674835205 seconds
+training data created in 8.885934591293335 seconds
+training data created in 5.08642578125 seconds
+training data created in 5.0545570850372314 seconds
+training data created in 9.900971412658691 seconds
+tuning and training completed in 15232.300722122192 seconds
+>>> lc_rf50_w3_v2_1k.test(examples[50000:100000],detailed_output=True)
+delta   n       error rate   sd       95% CI
+1       10054   0.0907       0.0735   (0.0893,0.0921)
+2       9944    0.1192       0.0929   (0.1173,0.1210)
+3       10116   0.1322       0.0979   (0.1303,0.1341)
+4       9961    0.1351       0.0985   (0.1332,0.1371)
+5       9925    0.1354       0.0996   (0.1335,0.1374)
+all     50000   0.1225       0.0945   (0.1217,0.1233)
+0.12248575000000275
+>>> [(c,lc_rf50_w3_v2_1k.classifiers[c].max_features) for c in lc_rf50_w3_v2_1k.classifiers]
+[(1, 24), (2, 16), (3, 32), (4, 28), (5, 8)]
+
+>>> lc_rf50_w3_v2_2k = LocalClassifier(window_size=3,off_board_value=-1,clf=RandomForestClassifier(n_estimators=50,max_depth=None,bootstrap=False,min_samples_split=64))
+>>> lc_rf50_w3_v2_2k.tune_and_train(examples[0:2000],rf_v2_params,use_transformations=True,verbosity=1)                                                         training data created in 10.571830034255981 seconds
+training data created in 10.611456871032715 seconds
+training data created in 20.830392599105835 seconds
+training data created in 11.111051797866821 seconds
+training data created in 11.009822845458984 seconds
+training data created in 22.173511266708374 seconds
+training data created in 9.254721403121948 seconds
+training data created in 9.262328147888184 seconds
+training data created in 18.65413546562195 seconds
+training data created in 9.410364627838135 seconds
+training data created in 9.410361528396606 seconds
+training data created in 18.554248809814453 seconds
+training data created in 8.962588548660278 seconds
+training data created in 9.251110792160034 seconds
+training data created in 17.915252923965454 seconds
+tuning and training completed in 35570.74250745773 seconds
+>>> lc_rf50_w3_v2_2k.test(examples[50000:100000],verbosity=2)
+testing completed in 611.8 seconds
+delta   n       error rate   sd       95% CI
+1       10054   0.0876       0.0719   (0.0862,0.0890)
+2       9944    0.1175       0.0925   (0.1157,0.1193)
+3       10116   0.1305       0.0973   (0.1286,0.1324)
+4       9961    0.1341       0.0986   (0.1321,0.1360)
+5       9925    0.1350       0.0998   (0.1330,0.1369)
+all     50000   0.1209       0.0943   (0.1201,0.1217)
+0.1208874500000028
+>>> [(c,lc_rf50_w3_v2_2k.classifiers[c].max_features) for c in lc_rf50_w3_v2_2k.classifiers]
+[(1, 28), (2, 24), (3, 16), (4, 28), (5, 12)]
+
+
+
+>>> lc_rf50_w3_v2_5k = LocalClassifier(window_size=3,off_board_value=-1,clf=RandomForestClassifier(n_estimators=50,max_depth=None,bootstrap=False,min_samples_split=64))
+>>> lc_rf50_w3_v2_5k.tune_and_train(examples[0:5000],rf_v2_params,use_transformations=True,verbosity=1)                                                         training data created in 25.883705854415894 seconds
+training data created in 24.995492935180664 seconds
+training data created in 50.93696403503418 seconds
+training data created in 24.83208727836609 seconds
+training data created in 25.13343858718872 seconds
+training data created in 50.68397521972656 seconds
+training data created in 23.598664045333862 seconds
+training data created in 24.279094457626343 seconds
+training data created in 48.23344373703003 seconds
+training data created in 23.747849941253662 seconds
+training data created in 23.98904061317444 seconds
+training data created in 47.859501361846924 seconds
+training data created in 23.774672508239746 seconds
+training data created in 23.761075258255005 seconds
+training data created in 47.21573829650879 seconds
+tuning and training completed in 108675.63503932953 seconds
+>>> lc_rf50_w3_v2_5k.test(examples[50000:100000],verbosity=2)                   testing completed in 666.5 seconds                                              delta   n       error rate   sd       95% CI
+1       10054   0.0843       0.0701   (0.0830,0.0857)
+2       9944    0.1155       0.0918   (0.1137,0.1173)
+3       10116   0.1291       0.0974   (0.1272,0.1310)
+4       9961    0.1325       0.0988   (0.1306,0.1345)
+5       9925    0.1343       0.1001   (0.1323,0.1363)
+all     50000   0.1191       0.0942   (0.1183,0.1199)
+0.11911675000000276
+>>> [(c,lc_rf50_w3_v2_5k.classifiers[c].max_features) for c in lc_rf50_w3_v2_5k.classifiers]
+[(1, 28), (2, 16), (3, 12), (4, 20), (5, 20)]
+
+
+>>> rf_v2_params = {'max_features': [4,8,12,16,20,24,28,32,36,40]}
+>>> lc_rf50_w3_v2_10k = LocalClassifier(window_size=3,off_board_value=-1,clf=RandomForestClassifier(n_estimators=50,max_depth=None,bootstrap=False,min_samples_split=64))
+>>> lc_rf50_w3_v2_10k.tune_and_train(examples[0:10000],rf_v2_params,use_transformations=True,verbosity=1)
+training data created in 52.04186129570007 seconds
+training data created in 51.93602466583252 seconds
+training data created in 100.99752449989319 seconds
+training data created in 48.92178726196289 seconds
+training data created in 48.63210916519165 seconds
+training data created in 98.59303116798401 seconds
+training data created in 50.60744619369507 seconds
+training data created in 49.424699544906616 seconds
+training data created in 99.02037763595581 seconds
+training data created in 48.923792362213135 seconds
+training data created in 47.89284086227417 seconds
+training data created in 97.44005489349365 seconds
+training data created in 48.50033712387085 seconds
+training data created in 48.43385601043701 seconds
+training data created in 97.17427468299866 seconds
+tuning and training completed in 249126.02746748924 seconds
+>>> lc_rf50_w3_v2_10k.test(examples[50000:100000],verbosity=2)
+testing completed in 752.8 seconds
+delta   n       error rate   sd       95% CI
+1       10054   0.0825       0.0690   (0.0811,0.0838)
+2       9944    0.1140       0.0914   (0.1122,0.1158)
+3       10116   0.1280       0.0974   (0.1261,0.1299)
+4       9961    0.1320       0.0988   (0.1301,0.1339)
+5       9925    0.1337       0.1003   (0.1318,0.1357)
+all     50000   0.1180       0.0940   (0.1172,0.1188)
+0.11799780000000303
+>>> [(c,lc_rf50_w3_v2_10k.classifiers[c].max_features) for c in lc_rf50_w3_v2_10k.classifiers]
+[(1, 20), (2, 20), (3, 20), (4, 20), (5, 20)]
+
+
+>>> rf_v2_params = {'max_features': [4,8,12,16,20,24,28,32,36,40]}
+>>> lc_rf20_w3_v2_50k = LocalClassifier(window_size=3,off_board_value=-1,clf=RandomForestClassifier(n_estimators=20,max_depth=None,bootstrap=False,min_samples_split=64))
+>>> lc_rf20_w3_v2_50k.tune_and_train(examples[0:50000],rf_v2_params,use_transformations=True,verbosity=1)
+training data created in 343.36220026016235 seconds
+training data created in 339.76860427856445 seconds
+training data created in 700.9078099727631 seconds
+training data created in 329.44479846954346 seconds
+training data created in 325.9180016517639 seconds
+training data created in 675.7179925441742 seconds
+training data created in 329.99989104270935 seconds
+training data created in 323.726842880249 seconds
+training data created in 666.9854068756104 seconds
+training data created in 318.82208251953125 seconds
+training data created in 323.7400424480438 seconds
+training data created in 666.0873396396637 seconds
+training data created in 320.81767773628235 seconds
+training data created in 319.5432279109955 seconds
+training data created in 679.0849301815033 seconds
+tuning and training completed in 1184774.120471239 seconds
+>>> pickle.dump(lc_rf20_w3_v2_50k,gzip.open('lc_rf20_w3_v2_50k.p.gz','wb'))
+>>> lc_rf20_w3_v2_50k.test(examples[50000:100000],verbosity=2)
+testing completed in 537.4 seconds
+delta   n       error rate   sd       95% CI
+1       10054   0.0787       0.0671   (0.0774,0.0800)
+2       9944    0.1116       0.0909   (0.1098,0.1134)
+3       10116   0.1264       0.0973   (0.1245,0.1283)
+4       9961    0.1307       0.0992   (0.1287,0.1326)
+5       9925    0.1330       0.1005   (0.1310,0.1349)
+all     50000   0.1160       0.0940   (0.1152,0.1168)
+0.11602280000000202
+>>> [(c,lc_rf20_w3_v2_50k.classifiers[c].max_features) for c in lc_rf20_w3_v2_50k.classifiers]
+[(1, 32), (2, 28), (3, 20), (4, 16), (5, 16)]
