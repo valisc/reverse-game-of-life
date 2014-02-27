@@ -14,6 +14,7 @@ v2 - max_depth=None and min_samples_split=64 and param tuning for max_features
 | 10 v2   | 0.1234 | 0.1220 | 0.1202 | 0.1190 |
 | 20 v2   | 0.1226 | 0.1213 | 0.1195 | 0.1184 | 0.1173 | 0.1160 |
 | 50 v2   | 0.1225 | 0.1209 | 0.1191 | 0.1180 | 
+| 20 w=4  |                          | 0.1185 |
 
 | delta=1 | Training set sizen                 |
 | # trees | 1k     | 2k     | 5k     | 10k    | 20k    |
@@ -930,3 +931,37 @@ all     50000   0.1160       0.0940   (0.1152,0.1168)
 0.11602280000000202
 >>> [(c,lc_rf20_w3_v2_50k.classifiers[c].max_features) for c in lc_rf20_w3_v2_50k.classifiers]
 [(1, 32), (2, 28), (3, 20), (4, 16), (5, 16)]
+
+
+>>> examples = pickle.load(open('examples_100k_0.p','rb'))
+>>> lc_rf20_w4_10k = LocalClassifier(window_size=4,off_board_value=-1,clf=RandomForestClassifier(n_estimators=20,min_samples_split=64,bootstrap=False))
+>>> rf_params = {'max_features':[8,12,16,20,24,28]}
+>>> lc_rf20_w4_10k.tune_and_train(examples[0:10000],rf_params,use_transformations=True,verbosity=1)
+training data created in 75.78102684020996 seconds
+training data created in 72.09375929832458 seconds
+training data created in 148.2244791984558 seconds
+training data created in 71.39351511001587 seconds
+training data created in 71.39021325111389 seconds
+training data created in 146.4496476650238 seconds
+training data created in 71.62614345550537 seconds
+training data created in 71.22429466247559 seconds
+training data created in 145.1832559108734 seconds
+training data created in 82.89398694038391 seconds
+training data created in 88.20773577690125 seconds
+training data created in 191.38896226882935 seconds
+training data created in 70.51035523414612 seconds
+training data created in 70.8036539554596 seconds
+training data created in 160.83912992477417 seconds
+tuning and training completed in 133021.47298526764 seconds
+>>> lc_rf20_w4_10k.test(examples[50000:100000],verbosity=2)
+testing completed in 382.9 seconds
+delta   n       error rate   sd       95% CI
+1       10054   0.0832       0.0696   (0.0819,0.0846)
+2       9944    0.1148       0.0919   (0.1129,0.1166)
+3       10116   0.1286       0.0977   (0.1267,0.1305)
+4       9961    0.1322       0.0990   (0.1303,0.1342)
+5       9925    0.1338       0.1003   (0.1319,0.1358)
+all     50000   0.1185       0.0943   (0.1177,0.1193)
+0.11848830000000132
+>>> [(c,lc_rf20_w4_10k.classifiers[c].max_features) for c in lc_rf20_w4_10k.classifiers]
+[(1, 28), (2, 28), (3, 28), (4, 24), (5, 20)]
